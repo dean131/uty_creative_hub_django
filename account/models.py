@@ -1,3 +1,7 @@
+import uuid
+import datetime
+
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
@@ -32,12 +36,13 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    user_id = models.CharField(max_length=30, primary_key=True, unique=True)
+    user_id = models.CharField(max_length=100, primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(max_length=255)
     email = models.EmailField(verbose_name="email address", max_length=255, unique=True)
 
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
@@ -65,7 +70,7 @@ class User(AbstractBaseUser):
     
 
 class UserProfile(models.Model):
-    profile_id = models.AutoField(primary_key=True, unique=True)
+    userprofile_id = models.AutoField(primary_key=True, unique=True)
     student_id_number = models.CharField(max_length=30)
     birth_place = models.CharField(max_length=255)
     birth_date = models.DateField()
@@ -75,6 +80,19 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     study_program = models.ForeignKey(StudyProgram, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.full_name
+
+
+class OTPCode(models.Model):
+    code = models.CharField(max_length=4)
+    expire = models.DateTimeField()
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.expire = timezone.now() + datetime.timedelta(minutes=5)
+        super(OTPCode, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.user.full_name
