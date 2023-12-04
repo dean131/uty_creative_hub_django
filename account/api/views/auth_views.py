@@ -18,7 +18,7 @@ from account.api.serializers.userprofile_serializers import (
     UserProfileModelSerializer,
 )
 
-from ...models import OTPCode, User
+from account.models import OTPCode, User
 from myapp.my_utils.send_email import send_otp
 
 
@@ -106,8 +106,10 @@ class LoginApiView(APIView):
         refresh['is_active'] = user.is_active
         refresh['is_admin'] = user.is_admin
 
-        if user.userprofile:
+        try:
             refresh['userprofile'] = UserProfileModelSerializer(user.userprofile).data
+        except:
+            pass
 
         login(request, user)
 

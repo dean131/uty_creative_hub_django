@@ -31,6 +31,7 @@ class CustomUserManager(BaseUserManager):
             **extra_fields,
         )
         user.is_admin = True
+        user.is_active = True
         user.save(using=self._db)
         return user
 
