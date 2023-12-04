@@ -2,11 +2,11 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 
-from .views import auth_views, user_profile_views
+from .views import auth_views, userprofile_views
 
 
 router = DefaultRouter()
-router.register('userprofiles', user_profile_views.UserProfileModelViewSet, basename='userprofile')
+router.register('userprofiles', userprofile_views.UserProfileModelViewSet, basename='userprofile')
 
 urlpatterns = [
     path('', include(router.urls)), 

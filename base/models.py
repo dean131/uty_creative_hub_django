@@ -120,7 +120,7 @@ class Booking(models.Model):
     booking_needs = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    bookin_time = models.ForeignKey(BookingTime, on_delete=models.CASCADE)
+    bookingtime = models.ForeignKey(BookingTime, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     

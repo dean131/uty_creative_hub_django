@@ -23,6 +23,16 @@ class CustomResponse:
             },
             status=status.HTTP_200_OK,
         )
+    
+    def updated(message, data):
+        return Response(
+            {
+                'success': True,
+                'message': message,
+                'data': data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def created(message, data, headers):
         return Response(

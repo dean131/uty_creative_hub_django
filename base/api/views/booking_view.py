@@ -4,13 +4,36 @@ from rest_framework.decorators import action
 
 from myapp.my_utils.custom_response import CustomResponse
 from base.models import Booking
-from base.api.serializers.booking_serializers import BookingModelSerializer
+from base.api.serializers.booking_serializers import (
+    BookingModelSerializer,
+    BookingDetailModelSerializer,
+)
 
 
 class BookingModelViewSet(ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingModelSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return BookingDetailModelSerializer
+        if self.action == 'create':
+            return BookingModelSerializer
+        return super().get_serializer_class()
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return CustomResponse.retrieve(
+                message='Booking fetched successfully',
+                data=serializer.data
+            )
+        except:
+            return CustomResponse.not_found(
+                message='Booking not found',
+            )
 
     def create(self, request, *args, **kwargs):
         request.data.update({'user': request.user.user_id})

@@ -31,3 +31,14 @@ class RoomDetailModelSerializer(serializers.ModelSerializer):
     def get_roomimages(self, obj):
         roomimages = obj.roomimage_set.all()
         return RoomImageModelSerializer(roomimages, many=True, context=self.context).data
+    
+
+class RoomDetailBookingModelSerializer(serializers.ModelSerializer):
+    room_images = serializers.SerializerMethodField()
+    class Meta:
+        model = Room
+        fields = ['room_name', 'room_images']
+
+    def get_room_images(self, obj):
+        room_image = obj.roomimage_set.all()
+        return RoomImageModelSerializer(room_image, many=True, context=self.context).data
