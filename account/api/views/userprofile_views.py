@@ -13,10 +13,12 @@ class UserProfileModelViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        request.data.update({'user': request.user.user_id})
-        serializer = self.get_serializer(data=request.data)
+        self.request.data.update({'user': self.request.user.user_id})
+        serializer = self.get_serializer(data=self.request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
+            self.request.user.is_active = True
+            self.request.user.save()
             headers = self.get_success_headers(serializer.data)
             return CustomResponse.created(
                 message='User profile created successfully',

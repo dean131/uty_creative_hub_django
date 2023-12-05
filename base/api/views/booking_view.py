@@ -23,17 +23,17 @@ class BookingModelViewSet(ModelViewSet):
         return super().get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return CustomResponse.retrieve(
-                message='Booking fetched successfully',
-                data=serializer.data
-            )
-        except:
-            return CustomResponse.not_found(
-                message='Booking not found',
-            )
+        # try:
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return CustomResponse.retrieve(
+            message='Booking fetched successfully',
+            data=serializer.data
+        )
+        # except:
+        #     return CustomResponse.not_found(
+        #         message='Booking not found',
+        #     )
 
     def create(self, request, *args, **kwargs):
         request.data.update({'user': request.user.user_id})

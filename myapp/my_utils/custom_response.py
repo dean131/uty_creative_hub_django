@@ -33,8 +33,17 @@ class CustomResponse:
             },
             status=status.HTTP_200_OK,
         )
+    
+    def ok(message):
+        return Response(
+            {
+                'success': True,
+                'message': message,
+            },
+            status=status.HTTP_200_OK,
+        )
 
-    def created(message, data, headers):
+    def created(message, data, headers=None):
         return Response(
             {
                 'success': True,
