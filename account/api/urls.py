@@ -6,6 +6,7 @@ from .views import auth_views, userprofile_views
 
 
 router = DefaultRouter()
+router.register('users', auth_views.UserModelViewSet, basename='user')
 router.register('userprofiles', userprofile_views.UserProfileModelViewSet, basename='userprofile')
 
 urlpatterns = [

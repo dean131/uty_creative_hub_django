@@ -1,24 +1,24 @@
 from rest_framework import serializers
 
-from account.models import User, UserProfile
+from account.models import User
 from account.api.serializers.userprofile_serializers import UserProfileBookingDetailModelSerializer
 
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
-        model: User
-        fields = ['user_id', 'full_name', 'email', 'is_active', 'is_admin']
-
-
-class UserRegisterSerializer(serializers.ModelSerializer):
-    class Meta:
         model = User
-        fields = ['full_name', 'email', 'password']
+        exclude = ['last_login']
         extra_kwargs = {
             'password': {
                 'write_only': True,
             },
         }
+
+
+class UserRegisterSerializer(UserModelSerializer):
+    class Meta:
+        model = User
+        fields = ['full_name', 'email', 'password']
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)

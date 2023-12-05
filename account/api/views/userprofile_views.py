@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 
-from account.models import UserProfile
+from account.models import UserProfile, User
 from myapp.my_utils.custom_response import CustomResponse
 from account.api.serializers.userprofile_serializers import UserProfileModelSerializer
 
@@ -10,10 +10,37 @@ from account.api.serializers.userprofile_serializers import UserProfileModelSeri
 class UserProfileModelViewSet(ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileModelSerializer
-    permission_classes = [IsAuthenticated]
+    
 
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == 'create':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+    
     def create(self, request, *args, **kwargs):
-        self.request.data.update({'user': self.request.user.user_id})
+
+        self.request.data._mutable = True
+
+        email = self.request.data.get('email')
+        if not email:
+            return CustomResponse.bad_request(
+                message='Email is required.'
+            )
+        user = User.objects.filter(email=email, is_active=False, is_verified=False).first()
+        if not user:
+            return CustomResponse.bad_request(
+                message='User is not found.'
+            )
+        self.request.user = user
+        self.request.data.update({'user': user.user_id})
+
+        self.request.data._mutable = False
+
         serializer = self.get_serializer(data=self.request.data)
         if serializer.is_valid():
             self.perform_create(serializer)

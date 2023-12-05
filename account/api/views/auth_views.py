@@ -5,13 +5,14 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import permissions
+from rest_framework import status, permissions
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from account.api.serializers.user_serializers import (
+    UserModelSerializer,
     UserRegisterSerializer,
 )
 from account.api.serializers.userprofile_serializers import (
@@ -21,6 +22,25 @@ from account.api.serializers.userprofile_serializers import (
 from account.models import OTPCode, User
 from myapp.my_utils.send_email import send_otp
 from myapp.my_utils.custom_response import CustomResponse
+
+
+class UserModelViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return CustomResponse.retrieve(
+                message='Successfully retrieved data',
+                data=serializer.data,
+            )
+        except:
+            return CustomResponse.not_found(
+                message='User not found.'
+            )
 
 
 class LoginApiView(APIView):
@@ -66,6 +86,11 @@ class LoginApiView(APIView):
                     'message': 'Your account is not active.',
                 },
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        if user.is_verified == False:
+            return CustomResponse.bad_request(
+                message='Your account is not verified.',
             )
         # END EMAIL VALIDATOR
 
@@ -191,7 +216,7 @@ class RegisterAPIView(APIView):
 
             send_otp(email_dest, name, otp_code)
 
-            return CustomResponse.created(
+            return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
 
@@ -236,7 +261,7 @@ class ConfirmEmailAPIView(APIView):
                 message='OTP Code is invalid',
             )
 
-        if otp_obj.expire > timezone.now():
+        if timezone.now() < otp_obj.expire:
             return CustomResponse.ok(
                 message='Email is active',
             )
@@ -349,6 +374,47 @@ class ResendOTPConfirmEmailAPIView(APIView):
         # END EMAIL VALIDATOR
 
         otp_obj = OTPCode.objects.filter(user__email=email, user__is_active=False).first()
+        if otp_obj:
+            otp_obj.code = otp_code
+            otp_obj.save()
+
+            send_otp(email, user.full_name, otp_code)
+
+            return CustomResponse.ok(
+                message='OTP Code has been sent to your email',
+            )
+        
+        return CustomResponse.not_found(
+            message='OTP Code is not Found',
+        )
+
+
+class ForgotPasswordAPIView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    
+    def post(self, request):
+        email = request.data.get('email')
+        otp_code = random.randint(1000, 9999)
+
+        # EMAIL VALIDATOR
+        if not email:
+            return CustomResponse.bad_request(
+                message='Email is required',
+            )
+        
+        if '@' not in email:
+            return CustomResponse.bad_request(
+                message='Email must be contain @',
+            )
+        
+        user = User.objects.filter(email=email, is_active=True).first()
+        if not user:
+            return CustomResponse.bad_request(
+                message='Email is not found',
+            )
+        # END EMAIL VALIDATOR
+
+        otp_obj = OTPCode.objects.filter(user__email=email, user__is_active=True).first()
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
