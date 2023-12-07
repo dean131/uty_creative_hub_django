@@ -1,0 +1,61 @@
+import datetime
+
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
+
+from base.models import BookingMember
+from base.api.serializers.bookingmember_serializers import BookingMemberSerializer
+from myapp.my_utils.custom_response import CustomResponse
+
+
+class BookingMemberModelViewSet(ModelViewSet):
+    queryset = BookingMember.objects.all()
+    serializer_class = BookingMemberSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        student_id_number = request.data.get('student_id_number')
+        booking_id = request.data.get('booking_id')
+        
+        bookingmembers = self.get_queryset().filter(
+            student_id_number=student_id_number,
+            booking__booking_id=booking_id
+        ).exists()
+        if bookingmembers:
+            return CustomResponse.bad_request(
+                message="Student ID Number already exists",
+            )
+
+        request.data.update({'booking': booking_id})
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return CustomResponse.created(
+                data=serializer.data,
+                message="Booking member created successfully",
+                headers=headers
+            )
+        return CustomResponse.serializers_erros(
+            errors=serializer.errors,
+        )
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            student_id_number = instance.booking.user.userprofile.student_id_number
+            if student_id_number == instance.student_id_number:
+                return CustomResponse.bad_request(
+                    message="You can't delete yourself",
+                )
+            self.perform_destroy(instance)
+            return CustomResponse.ok(
+                message="Booking member deleted successfully",
+            )
+        except:
+            return CustomResponse.not_found(
+                message="Booking member not found",
+            )
+
+
+        

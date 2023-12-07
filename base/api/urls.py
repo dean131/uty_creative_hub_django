@@ -8,6 +8,7 @@ from .views import (
     room_views,
     article_views,
     rating_views,
+    bookingmember_views,
 )
 
 router = DefaultRouter()
@@ -16,6 +17,7 @@ router.register('bookings', booking_view.BookingModelViewSet, basename='booking'
 router.register('rooms', room_views.RoomModelViewSet, basename='room')
 router.register('articles', article_views.ArticleModelViewSet, basename='article')
 router.register('ratings', rating_views.RatingModelViewSet, basename='rating')
+router.register('bookingmembers', bookingmember_views.BookingMemberModelViewSet, basename='bookingmember')
 
 urlpatterns = [
     path('', include(router.urls))

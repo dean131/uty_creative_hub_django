@@ -23,25 +23,6 @@ class CustomResponse:
             },
             status=status.HTTP_200_OK,
         )
-    
-    def updated(message, data):
-        return Response(
-            {
-                'success': True,
-                'message': message,
-                'data': data,
-            },
-            status=status.HTTP_200_OK,
-        )
-    
-    def ok(message):
-        return Response(
-            {
-                'success': True,
-                'message': message,
-            },
-            status=status.HTTP_200_OK,
-        )
 
     def created(message, data, headers=None):
         return Response(
@@ -53,16 +34,35 @@ class CustomResponse:
             status=status.HTTP_201_CREATED,
             headers=headers,
         )
-    
-    def not_found(message):
+        
+    def updated(message, data):
         return Response(
             {
-                'success': False,
+                'success': True,
                 'message': message,
+                'data': data,
             },
-            status=status.HTTP_404_NOT_FOUND,
+            status=status.HTTP_200_OK,
         )
     
+    def deleted(message):
+        return Response(
+            {
+                'success': True,
+                'message': message,
+            },
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+    def ok(message):
+        return Response(
+            {
+                'success': True,
+                'message': message,
+            },
+            status=status.HTTP_200_OK,
+        )
+
     def bad_request(message):
         return Response(
             {
@@ -70,6 +70,15 @@ class CustomResponse:
                 'message': message,
             },
             status=status.HTTP_400_BAD_REQUEST,
+        )
+        
+    def not_found(message):
+        return Response(
+            {
+                'success': False,
+                'message': message,
+            },
+            status=status.HTTP_404_NOT_FOUND,
         )
     
     def method_not_allowed(message):

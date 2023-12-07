@@ -108,6 +108,7 @@ class BookingTime(models.Model):
 
 class Booking(models.Model):
     BOOKING_STATUS = (
+        ("created", "Created"),
         ("pending", "Pending"),
         ("active", "Active"),
         ("done", "Done"),
@@ -116,9 +117,9 @@ class Booking(models.Model):
 
     booking_id = models.AutoField(primary_key=True, unique=True, editable=False)
     booking_date = models.DateField()
-    booking_status = models.CharField(max_length=30, default="pending", choices=BOOKING_STATUS)
+    booking_status = models.CharField(max_length=30, default="created", choices=BOOKING_STATUS)
     booking_needs = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=None, null=True, blank=True)
     
     bookingtime = models.ForeignKey(BookingTime, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -155,3 +156,40 @@ class Committee(models.Model):
 
     def __str__(self):
         return self.committee_name
+
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from channels.layers import get_channel_layer
+
+@receiver(post_save, sender=Booking)
+def create_bookingmember(sender, instance, created, **kwargs):
+    if created:
+        BookingMember.objects.create(
+            full_name=instance.user.full_name,
+            student_id_number=instance.user.userprofile.student_id_number,
+            studyprogram=instance.user.userprofile.studyprogram.study_program_name,
+            booking=instance,
+        )
+
+
+from asgiref.sync import async_to_sync
+@receiver(post_save, sender=Booking)
+def booking_status_notificatio(sender, instance, created, **kwargs):
+    if instance.booking_status == 'active':
+        notification = Notification.objects.create(
+            notification_title="Booking Approved",
+            notification_body=f"Your booking for {instance.room.room_name} on {instance.booking_date} has been approved",
+            user=instance.user
+        )
+        async_to_sync(get_channel_layer().group_send)(
+            'notification',
+            {
+                'type': 'push.notification',
+                'user_id': instance.user.user_id,
+                'title': notification.notification_title,
+                'message': notification.notification_body,
+            }
+        )

@@ -34,7 +34,7 @@ AUTH_USER_MODEL = "account.User"
 
 INSTALLED_APPS = [
     'daphne',
-    'chat.apps.ChatConfig',
+    'notification.apps.NotificationConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',

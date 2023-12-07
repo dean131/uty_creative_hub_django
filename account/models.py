@@ -32,6 +32,7 @@ class CustomUserManager(BaseUserManager):
         )
         user.is_admin = True
         user.is_active = True
+        user.is_verified = True
         user.save(using=self._db)
         return user
 
@@ -80,7 +81,7 @@ class UserProfile(models.Model):
     profile_pic = models.ImageField(upload_to="profile_pics", blank=True, null=True)
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    study_program = models.ForeignKey(StudyProgram, on_delete=models.CASCADE)
+    studyprogram = models.ForeignKey(StudyProgram, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.full_name
@@ -97,3 +98,34 @@ class OTPCode(models.Model):
 
     def __str__(self):
         return self.user.full_name
+    
+
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
+@receiver(pre_save, sender=User)
+def send_notification(sender, instance, **kwargs):
+    user = sender.objects.filter(user_id=instance.user_id).first()
+    if user:
+        print(user.is_verified)
+        print(instance.is_verified)
+        old_is_verified = user.is_verified
+        new_is_verified = instance.is_verified
+        if old_is_verified == False and new_is_verified == True:
+            full_name = instance.full_name.split(" ")
+            name = full_name[1] if (len(full_name[0]) < 3 and len(full_name) > 1) else full_name[0]
+            async_to_sync(get_channel_layer().group_send)(
+                'notification',
+                {
+                    'type': 'push.notification',
+                    'user_id': instance.user_id,
+                    'title': "Account Verified",
+                    'message': f"{name}, your account has been verified",
+                }
+            )
+
+
+

@@ -15,11 +15,9 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 
-from chat.routing import websocket_urlpatterns
+from notification.routing import websocket_urlpatterns
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
-
-import chat.routing
 
 application = ProtocolTypeRouter(
     {
