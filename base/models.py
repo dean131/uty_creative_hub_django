@@ -26,8 +26,8 @@ class Notification(models.Model):
     notification_body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None, null=True, blank=True)
+
     def __str__(self):
         return self.notification_title
     
@@ -142,7 +142,7 @@ class Article(models.Model):
     article_id = models.AutoField(primary_key=True, unique=True, editable=False)
     article_title = models.CharField(max_length=255)
     article_body = models.TextField()
-    article_image = models.ImageField(upload_to="article_images")
+    article_image = models.ImageField(upload_to="article_images", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -162,6 +162,7 @@ class Committee(models.Model):
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 @receiver(post_save, sender=Booking)
@@ -174,8 +175,6 @@ def create_bookingmember(sender, instance, created, **kwargs):
             booking=instance,
         )
 
-
-from asgiref.sync import async_to_sync
 @receiver(post_save, sender=Booking)
 def booking_status_notificatio(sender, instance, created, **kwargs):
     if instance.booking_status == 'active':
@@ -193,3 +192,27 @@ def booking_status_notificatio(sender, instance, created, **kwargs):
                 'message': notification.notification_body,
             }
         )
+
+@receiver(post_save, sender=Article)
+def article_notification(sender, instance, created, **kwargs):
+    if created:
+        notification = Notification.objects.create(
+            notification_title="New Article",
+            notification_body=f"{instance.article_title} has been posted",
+        )
+        async_to_sync(get_channel_layer().group_send)(
+            'notification',
+            {
+                'type': 'push.notification',
+                'user_id': None,
+                'title': notification.notification_title,
+                'message': notification.notification_body,
+            }
+        )
+
+
+
+
+
+
+
