@@ -4,7 +4,7 @@ from . import models
 
 
 class UserModelAdmin(admin.ModelAdmin):
-    list_display = ["email", "full_name", "is_admin", "is_active", "is_verified"]
+    list_display = ["email", "full_name", "is_active", "verification_status",  "is_admin"]
     list_filter = ["is_admin", "is_active"]
     search_fields = ["email", "full_name"]
 

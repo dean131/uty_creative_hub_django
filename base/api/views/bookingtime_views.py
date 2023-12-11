@@ -18,7 +18,7 @@ class BookingTimeModelViewSet(ModelViewSet):
     @action(detail=False, methods=['GET'])
     def available(self, request, *args, **kwargs):
         date = self.request.query_params.get('date')
-        room = self.request.query_params.get('room')
+        room_id = self.request.query_params.get('room_id')
 
         if not date:
             return Response(
@@ -29,18 +29,22 @@ class BookingTimeModelViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
-        if not room:
+        if not room_id:
             return Response(
                 {
                     'success': False,
-                    'message': 'Room is required',
+                    'message': 'Room id is required',
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
+        # Check if there is any booking on the same date and room
         queryset = self.get_queryset()
-        
-        bookeds = queryset.filter(booking__booking_date=date, booking__room__room_id=room)
+        bookeds = queryset.filter(
+            Q(booking__booking_status='pending') | Q(booking__booking_status='active'),
+            booking__booking_date=date, 
+            booking__room__room_id=room_id,
+        )
 
         conflict_times = []
         for booked in bookeds:
@@ -52,6 +56,7 @@ class BookingTimeModelViewSet(ModelViewSet):
             )
             for conflict in conflicted:
                 conflict_times.append(conflict.bookingtime_id)
+        # End of checking
 
         availables = queryset.filter(~Q(bookingtime_id__in=conflict_times))
         serializer = self.get_serializer(availables, many=True)

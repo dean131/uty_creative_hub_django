@@ -18,19 +18,7 @@ class StudyProgram(models.Model):
 
     def __str__(self):
         return self.study_program_name
-    
 
-class Notification(models.Model):
-    notification_id = models.AutoField(primary_key=True, unique=True, editable=False)
-    notification_title = models.CharField(max_length=255)
-    notification_body = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None, null=True, blank=True)
-
-    def __str__(self):
-        return self.notification_title
-    
 
 class Room(models.Model):
     ROOM_TYPE = (
@@ -50,11 +38,12 @@ class Room(models.Model):
     
     def save(self, *args, **kwargs):
         ratings = Rating.objects.filter(room=self)
-        total_rating = 0.0
-        ratings_count = ratings.count()
-        for rating in ratings:
-            total_rating += rating.rating_value
-        self.room_rating = total_rating / ratings_count
+        if ratings:
+            total_rating = 0.0
+            ratings_count = ratings.count()
+            for rating in ratings:
+                total_rating += rating.rating_value
+            self.room_rating = total_rating / ratings_count
         super(Room, self).save(*args, **kwargs)
     
 
@@ -108,7 +97,7 @@ class BookingTime(models.Model):
 
 class Booking(models.Model):
     BOOKING_STATUS = (
-        ("created", "Created"),
+        ("initiated", "Initiated"),
         ("pending", "Pending"),
         ("active", "Active"),
         ("done", "Done"),
@@ -117,7 +106,7 @@ class Booking(models.Model):
 
     booking_id = models.AutoField(primary_key=True, unique=True, editable=False)
     booking_date = models.DateField()
-    booking_status = models.CharField(max_length=30, default="created", choices=BOOKING_STATUS)
+    booking_status = models.CharField(max_length=30, default="initiated", choices=BOOKING_STATUS)
     booking_needs = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(default=None, null=True, blank=True)
     
@@ -131,10 +120,7 @@ class Booking(models.Model):
 
 class BookingMember(models.Model):
     bookingmember_id = models.AutoField(primary_key=True, unique=True, editable=False)
-    full_name = models.CharField(max_length=255)
-    student_id_number = models.CharField(max_length=30)
-    studyprogram = models.CharField(max_length=100)
-
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
 
 
@@ -158,61 +144,15 @@ class Committee(models.Model):
         return self.committee_name
 
 
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 
 @receiver(post_save, sender=Booking)
 def create_bookingmember(sender, instance, created, **kwargs):
     if created:
         BookingMember.objects.create(
-            full_name=instance.user.full_name,
-            student_id_number=instance.user.userprofile.student_id_number,
-            studyprogram=instance.user.userprofile.studyprogram.study_program_name,
+            user=instance.user,
             booking=instance,
         )
-
-@receiver(post_save, sender=Booking)
-def booking_status_notificatio(sender, instance, created, **kwargs):
-    if instance.booking_status == 'active':
-        notification = Notification.objects.create(
-            notification_title="Booking Approved",
-            notification_body=f"Your booking for {instance.room.room_name} on {instance.booking_date} has been approved",
-            user=instance.user
-        )
-        async_to_sync(get_channel_layer().group_send)(
-            'notification',
-            {
-                'type': 'push.notification',
-                'user_id': instance.user.user_id,
-                'title': notification.notification_title,
-                'message': notification.notification_body,
-            }
-        )
-
-@receiver(post_save, sender=Article)
-def article_notification(sender, instance, created, **kwargs):
-    if created:
-        notification = Notification.objects.create(
-            notification_title="New Article",
-            notification_body=f"{instance.article_title} has been posted",
-        )
-        async_to_sync(get_channel_layer().group_send)(
-            'notification',
-            {
-                'type': 'push.notification',
-                'user_id': None,
-                'title': notification.notification_title,
-                'message': notification.notification_body,
-            }
-        )
-
-
-
-
-
 
 

@@ -4,10 +4,10 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 
-from rest_framework.views import APIView
+from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework.decorators import action
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -41,134 +41,15 @@ class UserModelViewSet(ModelViewSet):
             return CustomResponse.not_found(
                 message='User not found.'
             )
-
-
-class LoginApiView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        # EMAIL VALIDATOR
-        if not email:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Email is required',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         
-        if '@' not in email:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Email must be contain @',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        
-        user = User.objects.filter(email=email).first()
-        if not user:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Email is not found',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        
-        if user.is_active == False:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Your account is not active.',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        
-        if user.is_verified == False:
-            return CustomResponse.bad_request(
-                message='Your account is not verified.',
-            )
-        # END EMAIL VALIDATOR
-
-        # PASSWORD VALIDATOR
-        if not password:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Password is required',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        
-        if len(password) < 8:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Password must be at least 8 characters',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # END PASSWORD VALIDATOR
-
-        user = authenticate(request, username=email, password=password)
-
-        if user is None:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'User is not found',
-                }, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )  
-        
-        if not user.check_password(password):
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Password is wrong',
-                }, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        
-        refresh = RefreshToken.for_user(user)
-
-        refresh['full_name'] = user.full_name
-        refresh['email'] = user.email
-        refresh['is_active'] = user.is_active
-        refresh['is_admin'] = user.is_admin
-
-        try:
-            refresh['userprofile'] = UserProfileModelSerializer(user.userprofile).data
-        except:
-            pass
-
-        login(request, user)
-
-        return Response(
-            {
-                'success': True,
-                'message': 'Successfully logged in',
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-        )
-    
-
-class RegisterAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
-
     @transaction.atomic
-    def post(self, request):
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def register(self, request, *args, **kwargs):
         name = request.data.get('full_name')
         email_dest = request.data.get('email')
         password = request.data.get('password')
         confirm_password = request.data.get('confirm_password')
         otp_code = random.randint(1000, 9999)
-
 
         # PASSWORD VALIDATOR
         if not password:
@@ -213,9 +94,7 @@ class RegisterAPIView(APIView):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-
             send_otp(email_dest, name, otp_code)
-
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -223,35 +102,18 @@ class RegisterAPIView(APIView):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-
             otp_obj = OTPCode.objects.create(
                 code=otp_code,
                 user=user,
             )
-
             send_otp(email_dest, name, otp_code)
-
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
-        
         return CustomResponse.serializers_erros(errors=serializer.errors)
-    
 
-class LogoutAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request):
-        logout(request)
-        return CustomResponse.ok(
-            message='Successfully logged out',
-        )
-    
-
-class ConfirmEmailAPIView(APIView):
-    permission_classes = (permissions.AllowAny,)
-    
-    def post(self, request):
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def confirm_otp(self, request, *args, **kwargs):
         otp_code = request.data.get('otp')
         email = request.data.get('email')
 
@@ -261,97 +123,145 @@ class ConfirmEmailAPIView(APIView):
                 message='OTP Code is invalid',
             )
 
-        if timezone.now() < otp_obj.expire:
-            return CustomResponse.ok(
-                message='Email is active',
+        if timezone.now() > otp_obj.expire:
+            return CustomResponse.bad_request(
+                message='OTP Code is expired',
             )
             
-        return CustomResponse.bad_request(
-            message='OTP Code is expired',
+        serializer = self.get_serializer(otp_obj.user)
+        return CustomResponse.retrieve(
+            message='Email is verified',
+            data=serializer.data,
+        )
+
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def login(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # EMAIL VALIDATOR
+        if not email:
+            return CustomResponse.bad_request(
+                message='Email is required',
+            )
+        
+        if '@' not in email:
+            return CustomResponse.bad_request(
+                message='Email must be contain @',
+            )
+        
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return CustomResponse.bad_request(
+                message='Email is not found',
+            )
+        
+        if user.is_active == False:
+            return CustomResponse.bad_request(
+                message='Please complete your registration first',
+            )
+        # END EMAIL VALIDATOR
+
+        # PASSWORD VALIDATOR
+        if not password:
+            return CustomResponse.bad_request(
+                message='Password is required',
+            )
+        
+        if len(password) < 8:
+            return CustomResponse.bad_request(
+                message='Password must be at least 8 characters',
+            )
+        # END PASSWORD VALIDATOR
+
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            return CustomResponse.bad_request(
+                message='User is not found',
+            )
+        
+        if not user.check_password(password):
+            return CustomResponse.bad_request(
+                message='Password is wrong',
+            )
+        
+        refresh = RefreshToken.for_user(user)
+        refresh['full_name'] = user.full_name
+        refresh['email'] = user.email
+        refresh['is_active'] = user.is_active
+        refresh['is_admin'] = user.is_admin
+
+        try:
+            refresh['userprofile'] = UserProfileModelSerializer(user.userprofile).data
+        except:
+            pass
+
+        login(request, user)
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Successfully logged in',
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
         )
     
+    @action(methods=['POST'], detail=False)
+    def logout(self, request):
+        logout(request)
+        return CustomResponse.ok(
+            message='Successfully logged out',
+        )
 
-class ChangePasswordAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request):
+    @action(methods=['POST'], detail=False)
+    def change_password(self, request):
         old_password = request.data.get('old_password')
         new_password = request.data.get('new_password')
         confirm_password = request.data.get('confirm_password')
 
         # PASSWORD VALIDATOR
         if not old_password:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Old password is required',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return CustomResponse.bad_request(
+                message='Old password is required',
             )
         
         if not new_password:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'New password is required',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return CustomResponse.bad_request(
+                message='New password is required',
             )
         
         if not confirm_password:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Confirm password is required',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return CustomResponse.bad_request(
+                message='Confirm password is required',
             )
         
         if new_password != confirm_password:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'New password and confirm password must be same',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return CustomResponse.bad_request(
+                message='New password and confirm password must be same',
             )
         
         if len(new_password) < 8:
-            return Response(
-                {
-                    'success': False,
-                    'message': 'New password must be at least 8 characters',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return CustomResponse.bad_request(
+                message='New password must be at least 8 characters',
             )
         # END PASSWORD VALIDATOR
 
         user = request.user
         if not user.check_password(old_password):
-            return Response(
-                {
-                    'success': False,
-                    'message': 'Old password is wrong',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return CustomResponse.bad_request(
+                message='Old password is wrong',
             )
         
         user.set_password(new_password)
         user.save()
 
-        return Response(
-            {
-                'success': True,
-                'message': 'Password changed successfully',
-            },
-            status=status.HTTP_200_OK,
+        return CustomResponse.ok(
+            message='Password has been changed',
         )
 
-
-class ResendOTPConfirmEmailAPIView(APIView):
-    permission_classes = (permissions.AllowAny,)
-    
-    def post(self, request):
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def resend_otp_email_validation(self, request):
         email = request.data.get('email')
         otp_code = random.randint(1000, 9999)
 
@@ -377,22 +287,16 @@ class ResendOTPConfirmEmailAPIView(APIView):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-
             send_otp(email, user.full_name, otp_code)
-
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
-        
         return CustomResponse.not_found(
             message='OTP Code is not Found',
         )
 
-
-class ForgotPasswordAPIView(APIView):
-    permission_classes = (permissions.AllowAny,)
-    
-    def post(self, request):
+    # FURTURE WORK
+    def forgot_password(self, request):
         email = request.data.get('email')
         otp_code = random.randint(1000, 9999)
 
@@ -428,8 +332,6 @@ class ForgotPasswordAPIView(APIView):
         return CustomResponse.not_found(
             message='OTP Code is not Found',
         )
-
-
 
 
 

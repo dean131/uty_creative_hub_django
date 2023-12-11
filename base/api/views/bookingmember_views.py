@@ -1,8 +1,7 @@
-import datetime
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
+from account.models import UserProfile
 from base.models import BookingMember
 from base.api.serializers.bookingmember_serializers import BookingMemberSerializer
 from myapp.my_utils.custom_response import CustomResponse
@@ -15,18 +14,31 @@ class BookingMemberModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         student_id_number = request.data.get('student_id_number')
-        booking_id = request.data.get('booking_id')
+
+        userprofile = UserProfile.objects.filter(
+            student_id_number=student_id_number).first()
+        
+        if not userprofile:
+            return CustomResponse.not_found(
+                message="Student is not registered",
+            )
+        
+        booking = request.user.booking_set.filter(
+            booking_status='initiated').first()
         
         bookingmembers = self.get_queryset().filter(
-            student_id_number=student_id_number,
-            booking__booking_id=booking_id
-        ).exists()
+            user=userprofile.user,
+            booking=booking).exists()
+        
         if bookingmembers:
             return CustomResponse.bad_request(
                 message="Student ID Number already exists",
             )
 
-        request.data.update({'booking': booking_id})
+        request.data.update({
+            'booking': booking.booking_id,
+            'user': userprofile.user.user_id
+        })
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)

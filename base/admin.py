@@ -1,7 +1,5 @@
 from django.contrib import admin
 
-from account.models import User
-
 from .models import (
     Article,
     Booking,
@@ -12,7 +10,6 @@ from .models import (
     StudyProgram,
     RoomImage,
     BookingMember,
-    Notification,
 )
 
 
@@ -33,4 +30,3 @@ admin.site.register(Article)
 admin.site.register(RoomFacility)
 admin.site.register(RoomImage)
 admin.site.register(BookingMember)
-admin.site.register(Notification)
