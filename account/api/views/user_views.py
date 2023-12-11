@@ -45,7 +45,6 @@ class UserModelViewSet(ModelViewSet):
     @transaction.atomic
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
     def register(self, request, *args, **kwargs):
-        name = request.data.get('full_name')
         email_dest = request.data.get('email')
         password = request.data.get('password')
         confirm_password = request.data.get('confirm_password')
@@ -94,7 +93,7 @@ class UserModelViewSet(ModelViewSet):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-            send_otp(email_dest, name, otp_code)
+            send_otp(email_dest, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -106,7 +105,7 @@ class UserModelViewSet(ModelViewSet):
                 code=otp_code,
                 user=user,
             )
-            send_otp(email_dest, name, otp_code)
+            send_otp(email_dest, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )

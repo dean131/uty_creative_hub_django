@@ -26,6 +26,7 @@ class UserProfileModelViewSet(ModelViewSet):
         Part of the registration process.
         """
         email = request.data.get('email')
+        full_name = request.data.get('full_name')
 
         if not email:
             return CustomResponse.bad_request(
@@ -38,13 +39,16 @@ class UserProfileModelViewSet(ModelViewSet):
                 message='User is not found.'
             )
         
+        user.full_name = full_name
+        user.save()
+        
         request.user = user
-        faculty = request.data.get('faculty_id')
-        studyprogram = request.data.get('studyprogram_id')
+        faculty_id = request.data.get('faculty_id')
+        studyprogram_id = request.data.get('studyprogram_id')
         request.data.update({
             'user': user.user_id,
-            'faculty': faculty,
-            'studyprogram': studyprogram,
+            'faculty': faculty_id,
+            'studyprogram': studyprogram_id,
         })
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

@@ -50,6 +50,13 @@ class BookingModelViewSet(ModelViewSet):
             return CustomResponse.not_found(
                 message='Booking not found',
             )
+        
+    @action(methods=['POST'], detail=False)
+    def validate(self, request, *args, **kwargs):
+        if request.user.verification_status != 'verified':
+            return CustomResponse.bad_request(
+                message='Can\'t initiate booking, your account is not verified yet',
+            )
 
     @action(methods=['POST'], detail=False)
     def initialize(self, request, *args, **kwargs):

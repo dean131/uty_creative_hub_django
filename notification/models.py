@@ -52,6 +52,9 @@ def send_notification(sender, instance, **kwargs):
     if user.verification_status == instance.verification_status:
         return False
     
+    if instance.full_name is None:
+        return False
+    
     title = ""
     message = ""
     name = name_formater(instance.full_name)
