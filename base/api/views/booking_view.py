@@ -57,6 +57,9 @@ class BookingModelViewSet(ModelViewSet):
             return CustomResponse.bad_request(
                 message='Can\'t initiate booking, your account is not verified yet',
             )
+        return CustomResponse.ok(
+            message='Booking validated successfully',
+        )
 
     @action(methods=['POST'], detail=False)
     def initialize(self, request, *args, **kwargs):
