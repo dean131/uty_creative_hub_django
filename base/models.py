@@ -36,16 +36,6 @@ class Room(models.Model):
     def __str__(self):
         return self.room_name
     
-    def save(self, *args, **kwargs):
-        ratings = Rating.objects.filter(room=self)
-        if ratings:
-            total_rating = 0.0
-            ratings_count = ratings.count()
-            for rating in ratings:
-                total_rating += rating.rating_value
-            self.room_rating = total_rating / ratings_count
-        super(Room, self).save(*args, **kwargs)
-    
 
 class RoomImage(models.Model):
     roomimage_id = models.AutoField(primary_key=True, unique=True, editable=False)
@@ -82,7 +72,6 @@ class Rating(models.Model):
     
     def save(self, *args, **kwargs):
         super(Rating, self).save(*args, **kwargs)
-        self.room.save()
 
 
 class BookingTime(models.Model):
@@ -144,7 +133,7 @@ class Committee(models.Model):
         return self.committee_name
 
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 @receiver(post_save, sender=Booking)
@@ -155,4 +144,27 @@ def create_bookingmember(sender, instance, created, **kwargs):
             booking=instance,
         )
 
+@receiver(post_save, sender=Rating)
+def update_room_rating(sender, instance, created, **kwargs):
+    if created:
+        room = instance.room
+        ratings = Rating.objects.filter(room=room)
+        total_rating = 0.0
+        for rating in ratings:
+            total_rating += rating.rating_value
+        room.room_rating = total_rating / ratings.count()
+        room.save()
 
+@receiver(post_delete, sender=Rating)
+def update_room_rating_delete(sender, instance, **kwargs):
+    room = instance.room
+    ratings = room.rating_set.filter()
+    if not ratings:
+        room.room_rating = 0.0
+        room.save()
+    else:
+        total_rating = 0.0
+        for rating in ratings:
+            total_rating += rating.rating_value
+        room.room_rating = total_rating / ratings.count()
+        room.save()
