@@ -4,6 +4,11 @@ from base.models import Rating
 
 
 class RatingModelSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
     class Meta:
         model = Rating
         fields = '__all__'
+
+    def get_user(self, obj):
+        user = obj.user
+        return user.full_name
