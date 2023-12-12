@@ -5,6 +5,7 @@ from myapp.my_utils.custom_response import CustomResponse
 from base.api.serializers.room_serializers import (
     RoomModelSerializer,
     RoomDetailModelSerializer,
+    RoomListModelSerializer,
 )
 from base.models import Room
 
@@ -17,6 +18,8 @@ class RoomModelViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return RoomDetailModelSerializer
+        elif self.action == 'list':
+            return RoomListModelSerializer
         return self.serializer_class
 
     def list(self, request, *args, **kwargs):
