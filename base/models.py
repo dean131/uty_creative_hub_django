@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 
 class Faculty(models.Model):
@@ -75,10 +77,9 @@ class Rating(models.Model):
 
 
 class BookingTime(models.Model):
-    bookingtime_id = models.AutoField(primary_key=True, unique=True)
+    bookingtime_id = models.CharField(max_length=2, primary_key=True, unique=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    duration = models.IntegerField()
 
     def __str__(self):
         return self.start_time.strftime("%H:%M") + " - " + self.end_time.strftime("%H:%M")
@@ -133,9 +134,7 @@ class Committee(models.Model):
         return self.committee_name
 
 
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-
+### SIGNALS ###
 @receiver(post_save, sender=Booking)
 def create_bookingmember(sender, instance, created, **kwargs):
     if created:

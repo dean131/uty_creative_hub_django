@@ -5,8 +5,6 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
-from base.models import StudyProgram, Faculty
-
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -39,7 +37,8 @@ class User(AbstractBaseUser):
     VERIFICATION_STATUS = (
         ('unverified', 'Unverified'),
         ('verified', 'Verified'),
-        ('rejected', 'Rejected')
+        ('rejected', 'Rejected'),
+        ('suspend', 'Suspend'),
     )
 
     user_id = models.CharField(max_length=100, primary_key=True, unique=True, default=uuid.uuid4, editable=False)
@@ -85,8 +84,8 @@ class UserProfile(models.Model):
     profile_pic = models.ImageField(upload_to='profile_pics', blank=True, null=True)
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
-    studyprogram = models.ForeignKey(StudyProgram, on_delete=models.CASCADE)
+    faculty = models.ForeignKey('base.Faculty', on_delete=models.CASCADE)
+    studyprogram = models.ForeignKey('base.StudyProgram', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.full_name if self.user.full_name else self.userprofile_id
