@@ -20,7 +20,7 @@ class BookingAdmin(admin.ModelAdmin):
 
 
 class BookingTimeAdmin(admin.ModelAdmin):
-    list_display = ['__str__']
+    list_display = ['bookingtime_id', '__str__']
 
 
 admin.site.register(Faculty)

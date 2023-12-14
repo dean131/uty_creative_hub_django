@@ -112,28 +112,6 @@ class UserModelViewSet(ModelViewSet):
         return CustomResponse.serializers_erros(errors=serializer.errors)
 
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
-    def confirm_otp(self, request, *args, **kwargs):
-        otp_code = request.data.get('otp')
-        email = request.data.get('email')
-
-        otp_obj = OTPCode.objects.filter(code=otp_code, user__email=email).first()
-        if not otp_obj:
-            return CustomResponse.bad_request(
-                message='OTP Code is invalid',
-            )
-
-        if timezone.now() > otp_obj.expire:
-            return CustomResponse.bad_request(
-                message='OTP Code is expired',
-            )
-            
-        serializer = self.get_serializer(otp_obj.user)
-        return CustomResponse.retrieve(
-            message='Email is verified',
-            data=serializer.data,
-        )
-
-    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
     def login(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -172,30 +150,31 @@ class UserModelViewSet(ModelViewSet):
                 message='Password must be at least 8 characters',
             )
         # END PASSWORD VALIDATOR
-
-        user = authenticate(request, username=email, password=password)
-        if user is None:
-            return CustomResponse.bad_request(
-                message='User is not found',
-            )
         
         if not user.check_password(password):
             return CustomResponse.bad_request(
                 message='Password is wrong',
             )
+
+        authenticated_user = authenticate(request, username=email, password=password)
+        if user is None:
+            return CustomResponse.bad_request(
+                message='User is not found',
+            )
         
-        refresh = RefreshToken.for_user(user)
-        refresh['full_name'] = user.full_name
-        refresh['email'] = user.email
-        refresh['is_active'] = user.is_active
-        refresh['is_admin'] = user.is_admin
+        refresh = RefreshToken.for_user(authenticated_user)
+        refresh['full_name'] = authenticated_user.full_name
+        refresh['email'] = authenticated_user.email
+        refresh['is_active'] = authenticated_user.is_active
+        refresh['is_admin'] = authenticated_user.is_admin
+        refresh['verification_status'] = authenticated_user.verification_status
 
         try:
-            refresh['userprofile'] = UserProfileModelSerializer(user.userprofile).data
+            refresh['userprofile'] = UserProfileModelSerializer(authenticated_user.userprofile).data
         except:
             pass
 
-        login(request, user)
+        login(request, authenticated_user)
 
         return Response(
             {
@@ -205,7 +184,29 @@ class UserModelViewSet(ModelViewSet):
                 'access': str(refresh.access_token),
             }
         )
-    
+
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def confirm_otp(self, request, *args, **kwargs):
+        otp_code = request.data.get('otp')
+        email = request.data.get('email')
+
+        otp_obj = OTPCode.objects.filter(code=otp_code, user__email=email).first()
+        if not otp_obj:
+            return CustomResponse.bad_request(
+                message='OTP Code is invalid',
+            )
+
+        if timezone.now() > otp_obj.expire:
+            return CustomResponse.bad_request(
+                message='OTP Code is expired',
+            )
+            
+        serializer = self.get_serializer(otp_obj.user)
+        return CustomResponse.retrieve(
+            message='Email is verified',
+            data=serializer.data,
+        )
+
     @action(methods=['POST'], detail=False)
     def logout(self, request):
         logout(request)
@@ -260,7 +261,7 @@ class UserModelViewSet(ModelViewSet):
         )
 
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
-    def resend_otp_email_validation(self, request):
+    def get_otp_email_validation(self, request):
         email = request.data.get('email')
         otp_code = random.randint(1000, 9999)
 
@@ -286,7 +287,7 @@ class UserModelViewSet(ModelViewSet):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-            send_otp(email, user.full_name, otp_code)
+            send_otp(email, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -294,8 +295,8 @@ class UserModelViewSet(ModelViewSet):
             message='OTP Code is not Found',
         )
 
-    # FURTURE WORK
-    def forgot_password(self, request):
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def get_otp_forgot_password(self, request):
         email = request.data.get('email')
         otp_code = random.randint(1000, 9999)
 
@@ -322,7 +323,7 @@ class UserModelViewSet(ModelViewSet):
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp(email, user.full_name, otp_code)
+            send_otp(email, otp_code, user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
@@ -330,6 +331,65 @@ class UserModelViewSet(ModelViewSet):
         
         return CustomResponse.not_found(
             message='OTP Code is not Found',
+        )    
+
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def forgot_password(self, request):
+        email = request.data.get('email')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        # EMAIL VALIDATOR
+        if not email:
+            return CustomResponse.bad_request(
+                message='Email is required',
+            )
+        
+        if '@' not in email:
+            return CustomResponse.bad_request(
+                message='Email must be contain @',
+            )
+        
+        user = User.objects.filter(email=email, is_active=True).first()
+        if not user:
+            return CustomResponse.bad_request(
+                message='Email is not found',
+            )
+        # END EMAIL VALIDATOR
+
+        # PASSWORD VALIDATOR
+        if not new_password:
+            return CustomResponse.bad_request(
+                message='New password is required',
+            )
+        
+        if not confirm_password:
+            return CustomResponse.bad_request(
+                message='Confirm password is required',
+            )
+        
+        if new_password != confirm_password:
+            return CustomResponse.bad_request(
+                message='New password and confirm password must be same',
+            )
+        
+        if len(new_password) < 8:
+            return CustomResponse.bad_request(
+                message='New password must be at least 8 characters',
+            )
+        # END PASSWORD VALIDATOR
+
+        user = User.objects.filter(email=email, is_active=True).first()
+        if not user:
+            return CustomResponse.bad_request(
+                message='Email is not found',
+            )
+        
+        user.set_password(new_password)
+        user.save()
+
+        return CustomResponse.ok(
+            message='Password has been changed',
         )
 
 
