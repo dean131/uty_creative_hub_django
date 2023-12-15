@@ -1,6 +1,7 @@
 import datetime
 
 from django.db.models import Q
+from django.db import transaction
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -24,7 +25,7 @@ class BookingModelViewSet(ModelViewSet):
         if self.action == 'retrieve':
             return BookingDetailModelSerializer
         return super().get_serializer_class()
-    
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -37,7 +38,7 @@ class BookingModelViewSet(ModelViewSet):
             message='Booking list fetched successfully',
             data=serializer.data
         )
-    
+
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -50,7 +51,7 @@ class BookingModelViewSet(ModelViewSet):
             return CustomResponse.not_found(
                 message='Booking not found',
             )
-        
+
     @action(methods=['POST'], detail=False)
     def validate(self, request, *args, **kwargs):
         if request.user.verification_status != 'verified':
@@ -61,10 +62,10 @@ class BookingModelViewSet(ModelViewSet):
             message='Booking validated successfully',
         )
 
+    @transaction.atomic
     @action(methods=['POST'], detail=False)
     def initialize(self, request, *args, **kwargs):
         user = request.user
-        bookingtime_id = request.data.get('bookingtime_id')
         room_id = request.data.get('room_id')
         date = request.data.get('booking_date')
 
@@ -75,15 +76,15 @@ class BookingModelViewSet(ModelViewSet):
 
         request.data.update({
             'user': request.user.user_id,
-            'bookingtime': bookingtime_id,
-            'room': room_id
+            # 'room': room_id
         })
 
         # Check if there is any booking on the same date and room
         queryset = BookingTime.objects.all()
         bookeds = queryset.filter(
-            Q(booking__booking_status='pending') | Q(booking__booking_status='active'),
-            booking__booking_date=date, 
+            Q(booking__booking_status='pending') | Q(
+                booking__booking_status='active'),
+            booking__booking_date=date,
             booking__room__room_id=room_id,
         )
 
@@ -91,7 +92,7 @@ class BookingModelViewSet(ModelViewSet):
         for booked in bookeds:
             conflicted = queryset.filter(
                 Q(start_time__gte=booked.start_time, start_time__lte=booked.end_time) |
-                Q(end_time__gte=booked.start_time, end_time__lte=booked.end_time) | 
+                Q(end_time__gte=booked.start_time, end_time__lte=booked.end_time) |
                 Q(start_time__lte=booked.start_time, end_time__gte=booked.end_time) |
                 Q(start_time__gte=booked.start_time, end_time__lte=booked.end_time)
             )
@@ -112,7 +113,8 @@ class BookingModelViewSet(ModelViewSet):
         if booking:
             booking.booking_needs = ""
             booking.bookingmember_set.filter().exclude(user=user).delete()
-            serializer = self.get_serializer(booking, data=request.data, partial=True)
+            serializer = self.get_serializer(
+                booking, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return CustomResponse.created(
@@ -122,7 +124,7 @@ class BookingModelViewSet(ModelViewSet):
             return CustomResponse.bad_request(
                 message='Booking update failed'
             )
-        
+
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
@@ -133,7 +135,7 @@ class BookingModelViewSet(ModelViewSet):
                 headers=headers,
             )
         return CustomResponse.serializers_erros(errors=serializer.errors)
-    
+
     def create(self, request, *args, **kwargs):
         booking_needs = request.data.get('booking_needs')
 
@@ -141,14 +143,14 @@ class BookingModelViewSet(ModelViewSet):
             user=request.user,
             booking_status='initiated',
         ).first()
-        
+
         booking.booking_needs = booking_needs
         booking.save()
 
         return CustomResponse.ok(
             message='Booking created successfully',
         )
-    
+
     @action(methods=['POST'], detail=True)
     def confirm(self, request, *args, **kwargs):
         try:
@@ -157,13 +159,13 @@ class BookingModelViewSet(ModelViewSet):
             instance.created_at = datetime.datetime.now()
             instance.save()
 
-            bookingmembers = instance.bookingmember_set.filter().exclude(user=request.user)
-            for bookingmember in bookingmembers:
-                Notification.objects.create(
-                    user=bookingmember.user,
-                    notification_title='Add to booking',
-                    notification_body=f'You have been added to a booking by {request.user.full_name}',
-                )
+            # bookingmembers = instance.bookingmember_set.filter().exclude(user=request.user)
+            # for bookingmember in bookingmembers:
+            #     Notification.objects.create(
+            #         user=bookingmember.user,
+            #         notification_title='Add to booking',
+            #         notification_body=f'You have been added to a booking by {request.user.full_name}',
+            #     )
 
             return CustomResponse.ok(
                 message='Booking confirmed successfully',
@@ -172,7 +174,7 @@ class BookingModelViewSet(ModelViewSet):
             return CustomResponse.not_found(
                 message='Booking not found',
             )
-    
+
     @action(methods=['GET'], detail=False)
     def history(self, request, *args, **kwargs):
         user = request.user
