@@ -3,13 +3,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from account.models import UserProfile
 from base.models import BookingMember
-from base.api.serializers.bookingmember_serializers import BookingMemberSerializer
+from base.api.serializers.bookingmember_serializers import BookingMemberModelSerializer
 from myapp.my_utils.custom_response import CustomResponse
 
 
 class BookingMemberModelViewSet(ModelViewSet):
     queryset = BookingMember.objects.all()
-    serializer_class = BookingMemberSerializer
+    serializer_class = BookingMemberModelSerializer
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
@@ -20,19 +20,22 @@ class BookingMemberModelViewSet(ModelViewSet):
         
         if not userprofile:
             return CustomResponse.not_found(
-                message="Student is not registered",
+                message="Student is not registered"
+            )
+        
+        if userprofile.user.verification_status != 'verified':
+            return CustomResponse.bad_request(
+                message="Student is not verified"
             )
         
         booking = request.user.booking_set.filter(
             booking_status='initiated').first()
         
-        bookingmembers = self.get_queryset().filter(
+        if self.get_queryset().filter(
             user=userprofile.user,
-            booking=booking).exists()
-        
-        if bookingmembers:
+            booking=booking).exists():
             return CustomResponse.bad_request(
-                message="Student ID Number already exists",
+                message="Student ID Number already exists"
             )
 
         request.data.update({
@@ -48,15 +51,13 @@ class BookingMemberModelViewSet(ModelViewSet):
                 message="Booking member created successfully",
                 headers=headers
             )
-        return CustomResponse.serializers_erros(
-            errors=serializer.errors,
-        )
+        return CustomResponse.serializers_erros(serializer.errors)
     
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             student_id_number = instance.booking.user.userprofile.student_id_number
-            if student_id_number == instance.student_id_number:
+            if student_id_number == instance.user.userprofile.student_id_number:
                 return CustomResponse.bad_request(
                     message="You can't delete yourself",
                 )

@@ -97,7 +97,7 @@ class OTPCode(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
-        self.expire = timezone.now() + datetime.timedelta(minutes=5)
+        self.expire = timezone.now() + datetime.timedelta(minutes=2)
         super(OTPCode, self).save(*args, **kwargs)
 
     def __str__(self):

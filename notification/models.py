@@ -91,9 +91,6 @@ def booking_status_notificatio(sender, instance, **kwargs):
     
     if booking.booking_status == instance.booking_status:
         return False
-    
-    if instance.booking_status == "created":
-        return False
 
     title = ""
     message = ""
@@ -106,6 +103,17 @@ def booking_status_notificatio(sender, instance, **kwargs):
     elif instance.booking_status == "active":
         title = "Booking Approved"
         message = f"Hi {name}, your booking has been approved."
+
+        bookingmembers = instance.bookingmember_set.filter().exclude(
+            user=instance.user
+        ).values('user__user_id', 'user__full_name')
+        
+        for bookingmember in bookingmembers:
+            Notification.objects.create(
+                notification_title='Added to Booking',
+                notification_body=f"Hi {name_formater(bookingmember['user__full_name'])}, you have been added to a booking by {name} on {instance.booking_date} in {instance.room.room_name}.",
+                user=User.objects.filter(user_id=bookingmember['user__user_id']).first()
+            )
 
     elif instance.booking_status == "rejected":
         title = "Booking Rejected"

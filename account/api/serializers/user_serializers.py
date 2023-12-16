@@ -1,13 +1,15 @@
 from rest_framework import serializers
 
 from account.models import User
-from account.api.serializers.userprofile_serializers import UserProfileBookingDetailModelSerializer
+from account.api.serializers.userprofile_serializers import (
+    UserProfileBookingDetailModelSerializer,
+)
 
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = ['last_login']
+        fields = '__all__'
         extra_kwargs = {
             'password': {
                 'write_only': True,
@@ -30,9 +32,3 @@ class UserBookingDetailModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['full_name', 'userprofile']
-
-    # def get_userprofile(self, obj):
-    #     userprofile = UserProfile.objects.filter(user=obj)
-    #     if not userprofile:
-    #         return None
-    #     return UserProfileModelSerializer(userprofile).data
