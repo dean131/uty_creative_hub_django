@@ -215,13 +215,7 @@ EMAIL_HOST_PASSWORD = 'eoav ksdj ldue jgjw'
 EMAIL_USE_TLS = True
 
 
-# CELERY SETTINGS
-
-# set the celery broker url 
+# Celery Configurations
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
-  
-# set the celery result backend 
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-  
-# set the celery timezone 
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = "Asia/Jakarta"

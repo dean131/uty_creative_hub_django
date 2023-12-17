@@ -41,6 +41,9 @@ class Room(models.Model):
     def __str__(self):
         return self.room_name
     
+    def total_raters(self):
+        return self.rating_set.count()
+    
 
 class RoomImage(models.Model):
     roomimage_id = models.AutoField(primary_key=True, unique=True, editable=False)

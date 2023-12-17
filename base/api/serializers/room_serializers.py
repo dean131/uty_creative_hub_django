@@ -16,7 +16,17 @@ class RoomListModelSerializer(serializers.ModelSerializer):
     roomimages = serializers.SerializerMethodField()
     class Meta:
         model = Room
-        fields = '__all__'
+        fields = [
+            "room_id",
+            "room_name",
+            "floor",
+            "room_type",
+            "room_capacity",
+            "room_rating",
+            "total_raters",
+            "created_at",
+            "roomimages",
+        ]
 
     def get_roomimages(self, obj):
         roomimages = obj.roomimage_set.all()
@@ -29,7 +39,20 @@ class RoomDetailModelSerializer(serializers.ModelSerializer):
     roomimages = serializers.SerializerMethodField()
     class Meta:
         model = Room
-        fields = '__all__'
+        fields = [
+            "room_id",
+            "room_name",
+            "floor",
+            "room_type",
+            "room_capacity",
+            "room_description",
+            "room_rating",
+            "total_raters",
+            "created_at",
+            "ratings",
+            "facilities",
+            "roomimages",
+        ]
 
     def get_ratings(self, obj):
         ratings = obj.rating_set.all()

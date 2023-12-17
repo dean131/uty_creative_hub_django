@@ -25,6 +25,9 @@ class UserProfileModelViewSet(ModelViewSet):
         """
         Part of the registration process.
         """
+        # _mutable = request.data._mutable
+        # request.data._mutable = True
+
         email = request.data.get('email')
         full_name = request.data.get('full_name')
 

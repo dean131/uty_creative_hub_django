@@ -130,6 +130,17 @@ class BookingModelViewSet(ModelViewSet):
                 headers=headers
             )
         return CustomResponse.serializers_erros(serializer.errors)
+    
+    @action(methods=['POST'], detail=False)
+    def validate(self, request, *args, **kwargs):
+        if request.user.verification_status != 'verified':
+            return CustomResponse.bad_request(
+                message='User is not verified',
+            )
+
+        return CustomResponse.ok(
+            message='User is verified',
+        )
 
     @action(methods=['GET'], detail=False)
     def history(self, request, *args, **kwargs):

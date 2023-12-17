@@ -12,7 +12,8 @@ from base.models import (
     Booking,
 )
 
-from notification.tasks import send_scheduled_notification
+from .tasks import send_scheduled_notification
+from django.utils import timezone
 import datetime
 
 
@@ -118,9 +119,33 @@ def booking_status_notification(sender, instance, **kwargs):
                 user=User.objects.filter(user_id=bookingmember['user__user_id']).first()
             )
 
+        # print(type(instance.booking_date))
+        # print(type(instance.bookingtime.end_time))
+            
+        date = instance.booking_date
+        time = instance.bookingtime.end_time
+        # print(type(datetime.datetime.strptime(date, '%Y-%m-%d').date()))
+        # print(type(datetime.datetime.strptime(time, '%H:%M:%S').time()))
+
+        # date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+        # time = datetime.datetime.strptime(time, '%H:%M:%S').time()
+
+        combined = datetime.datetime.combine(date, time)
+        # print(combined) 
+
+        # print(f'Datetime: {datetime.datetime.now()}')
+        # print(f'Timezone: {timezone.datetime.now()}')
+        
+        converted_datetime = timezone.make_aware(combined, timezone.get_current_timezone())
+        # print(f'Converted: {converted_datetime}')
+
         send_scheduled_notification.apply_async(
-            ('testttt', 'testtt', 'testttt'),
-            countdown=5
+            (
+                f"Booking Reminder",
+                f"Hi {name}, your booking will end in 10 minutes",
+                instance.user.user_id
+            ),
+            eta=converted_datetime - datetime.timedelta(minutes=10)
         )
 
     elif instance.booking_status == "rejected":
