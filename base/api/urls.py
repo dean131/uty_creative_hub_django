@@ -11,6 +11,7 @@ from .views import (
     bookingmember_views,
     faculty_views,
     roomimage_views,
+    studyprogram_views,
 )
 
 router = DefaultRouter()
@@ -22,6 +23,7 @@ router.register('ratings', rating_views.RatingModelViewSet, basename='rating')
 router.register('bookingmembers', bookingmember_views.BookingMemberModelViewSet, basename='bookingmember')
 router.register('faculties', faculty_views.FacultyModelViewSet, basename='faculty')
 router.register('roomimages', roomimage_views.RoomImageModelViewSet, basename='roomimage')
+router.register('studyprograms', studyprogram_views.StudyProgramModelViewSet, basename='studyprogram')
 
 urlpatterns = [
     path('', include(router.urls))

@@ -12,6 +12,9 @@ from base.models import (
     Booking,
 )
 
+from notification.tasks import send_scheduled_notification
+import datetime
+
 
 def name_formater(full_name):
     full_name = full_name.split(' ')
@@ -84,7 +87,7 @@ def userprofile_notification(sender, instance, created, **kwargs):
         )
 
 @receiver(pre_save, sender=Booking)
-def booking_status_notificatio(sender, instance, **kwargs):
+def booking_status_notification(sender, instance, **kwargs):
     booking  = sender.objects.filter(booking_id=instance.booking_id).first()
     if not booking:
         return False
@@ -114,6 +117,11 @@ def booking_status_notificatio(sender, instance, **kwargs):
                 notification_body=f"Hi {name_formater(bookingmember['user__full_name'])}, you have been added to a booking by {name} on {instance.booking_date} in {instance.room.room_name}.",
                 user=User.objects.filter(user_id=bookingmember['user__user_id']).first()
             )
+
+        send_scheduled_notification.apply_async(
+            ('testttt', 'testtt', 'testttt'),
+            countdown=5
+        )
 
     elif instance.booking_status == "rejected":
         title = "Booking Rejected"

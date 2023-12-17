@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'celery',
     'rest_framework',
     'rest_framework_simplejwt',
     'django_extensions',
@@ -212,3 +213,15 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'ilhamdeanabdillah9c@gmail.com'
 EMAIL_HOST_PASSWORD = 'eoav ksdj ldue jgjw'
 EMAIL_USE_TLS = True
+
+
+# CELERY SETTINGS
+
+# set the celery broker url 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+  
+# set the celery result backend 
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+  
+# set the celery timezone 
+CELERY_TIMEZONE = 'UTC'
