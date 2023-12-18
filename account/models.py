@@ -76,7 +76,7 @@ class User(AbstractBaseUser):
 
 class UserProfile(models.Model):
     userprofile_id = models.AutoField(primary_key=True, unique=True)
-    student_id_number = models.CharField(max_length=30)
+    student_id_number = models.CharField(max_length=30, unique=True)
     birth_place = models.CharField(max_length=255, null=True, blank=True)
     birth_date = models.DateField()
     whatsapp_number = models.CharField(max_length=30)

@@ -3,6 +3,7 @@ from rest_framework import serializers
 from account.models import User
 from account.api.serializers.userprofile_serializers import (
     UserProfileBookingDetailModelSerializer,
+    UserProfileModelSerializer,
 )
 
 
@@ -15,6 +16,15 @@ class UserModelSerializer(serializers.ModelSerializer):
                 'write_only': True,
             },
         }
+
+
+class UserListSerializer(UserModelSerializer):
+    userprofile = serializers.SerializerMethodField()
+
+    def get_userprofile(self, obj):
+        if obj.userprofile:
+            return UserProfileModelSerializer(obj.userprofile).data
+        return None
 
 
 class UserRegisterSerializer(UserModelSerializer):

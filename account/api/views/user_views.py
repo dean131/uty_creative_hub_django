@@ -14,6 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from account.api.serializers.user_serializers import (
     UserModelSerializer,
     UserRegisterSerializer,
+    UserListSerializer,
 )
 from account.api.serializers.userprofile_serializers import (
     UserProfileModelSerializer,
@@ -28,6 +29,11 @@ class UserModelViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserModelSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return UserListSerializer
+        return super().get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
         try:
