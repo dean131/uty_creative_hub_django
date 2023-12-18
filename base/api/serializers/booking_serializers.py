@@ -31,7 +31,7 @@ class BookingDetailModelSerializer(serializers.ModelSerializer):
             'bookingtime',
             'user',
             'room',
-            'bookingmember'
+            'bookingmember',
         ]
 
     def get_bookingmember(self, obj):

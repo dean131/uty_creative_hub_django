@@ -152,7 +152,10 @@ class BookingModelViewSet(ModelViewSet):
                 message='Booking status is required',
             )
 
-        queryset = self.get_queryset().filter(booking_status=booking_status, user=user)
+        queryset = self.get_queryset().filter(
+            booking_status=booking_status, 
+            user=user,
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
