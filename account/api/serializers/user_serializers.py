@@ -31,4 +31,4 @@ class UserBookingDetailModelSerializer(serializers.ModelSerializer):
     userprofile = UserProfileBookingDetailModelSerializer()
     class Meta:
         model = User
-        fields = ['full_name', 'userprofile']
+        fields = ['full_name', 'email', 'userprofile']

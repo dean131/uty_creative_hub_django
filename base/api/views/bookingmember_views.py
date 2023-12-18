@@ -3,7 +3,10 @@ from rest_framework.permissions import IsAuthenticated
 
 from account.models import UserProfile
 from base.models import BookingMember
-from base.api.serializers.bookingmember_serializers import BookingMemberModelSerializer
+from base.api.serializers.bookingmember_serializers import (
+    BookingMemberModelSerializer,
+    BookingMemberBookingDetailSerializer
+)
 from myapp.my_utils.custom_response import CustomResponse
 
 
@@ -11,6 +14,11 @@ class BookingMemberModelViewSet(ModelViewSet):
     queryset = BookingMember.objects.all()
     serializer_class = BookingMemberModelSerializer
     permission_classes = [IsAuthenticated]
+
+    # def get_serializer_class(self):
+    #     if self.action == 'create':
+    #         return BookingMemberCreateModelSerializer
+    #     return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
         student_id_number = request.data.get('student_id_number')
@@ -44,8 +52,10 @@ class BookingMemberModelViewSet(ModelViewSet):
         })
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            self.perform_create(serializer)
+            bookingmember = serializer.save()
             headers = self.get_success_headers(serializer.data)
+
+            serializer = BookingMemberBookingDetailSerializer(bookingmember)
             return CustomResponse.created(
                 data=serializer.data,
                 message="Booking member created successfully",

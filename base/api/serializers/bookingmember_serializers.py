@@ -2,7 +2,9 @@ from rest_framework import serializers
 
 from base.models import BookingMember
 
-from account.api.serializers.user_serializers import UserBookingDetailModelSerializer
+from account.api.serializers.user_serializers import (
+    UserBookingDetailModelSerializer
+)
 
 
 class BookingMemberModelSerializer(serializers.ModelSerializer):
