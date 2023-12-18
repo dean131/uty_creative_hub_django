@@ -11,10 +11,14 @@ class UserProfileModelSerializer(serializers.ModelSerializer):
 
 class UserProfileBookingDetailModelSerializer(serializers.ModelSerializer):
     studyprogram = serializers.SerializerMethodField()
+    faculty = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
         fields = ['student_id_number', 'whatsapp_number', 'faculty', 'studyprogram']
 
     def get_studyprogram(self, obj):
         return obj.studyprogram.study_program_name
+    
+    def get_faculty(self, obj):
+        return obj.faculty.faculty_name
 
