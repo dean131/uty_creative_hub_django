@@ -7,7 +7,7 @@ from django.dispatch import receiver
 class Faculty(models.Model):
     faculty_id = models.AutoField(primary_key=True, unique=True, editable=False)
     faculty_name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.faculty_name
@@ -16,7 +16,7 @@ class Faculty(models.Model):
 class StudyProgram(models.Model):
     studyprogram_id = models.AutoField(primary_key=True, unique=True, editable=False)
     study_program_name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
 
@@ -36,7 +36,7 @@ class Room(models.Model):
     room_capacity = models.IntegerField()
     room_description = models.TextField(null=True, blank=True)
     room_rating = models.FloatField(default=0.0)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.room_name
@@ -48,7 +48,7 @@ class Room(models.Model):
 class RoomImage(models.Model):
     roomimage_id = models.AutoField(primary_key=True, unique=True, editable=False)
     room_image = models.ImageField(upload_to="room_images")
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     
@@ -60,7 +60,7 @@ class RoomFacility(models.Model):
     roomfacility_id = models.AutoField(primary_key=True, unique=True, editable=False)
     facility_name = models.CharField(max_length=255)
     facility_icon = models.ImageField(upload_to="facility_icons")
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
 
@@ -139,10 +139,16 @@ class Committee(models.Model):
     committee_id = models.AutoField(primary_key=True, unique=True, editable=False)
     committee_name = models.CharField(max_length=255)
     committee_position = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.committee_name
+
+
+class Banner(models.Model):
+    banner_id = models.AutoField(primary_key=True, unique=True, editable=False)
+    banner_image = models.ImageField(upload_to="banner_images")
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 ### SIGNALS ###

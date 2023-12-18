@@ -51,6 +51,11 @@ class BookingTimeModelViewSet(ModelViewSet):
             many=True
         )
 
+        if serializer.data == []:
+            return CustomResponse.not_found(
+                message='No available booking times found'
+            )
+
         return CustomResponse.list(
             data=serializer.data,
             message='Available booking times retrieved successfully',

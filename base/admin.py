@@ -12,6 +12,7 @@ from .models import (
     BookingMember,
     Rating,
     Committee,
+    Banner,
 )
 
 
@@ -34,4 +35,5 @@ admin.site.register(RoomImage)
 admin.site.register(BookingMember)
 admin.site.register(Rating)
 admin.site.register(Committee)
+admin.site.register(Banner)
 
