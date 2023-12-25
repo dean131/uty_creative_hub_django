@@ -139,14 +139,33 @@ def booking_status_notification(sender, instance, **kwargs):
         converted_datetime = timezone.make_aware(combined, timezone.get_current_timezone())
         # print(f'Converted: {converted_datetime}')
 
-        send_scheduled_notification.apply_async(
-            (
-                f"Booking Reminder",
-                f"Hi {name}, your booking will end in 10 minutes",
-                instance.user.user_id
-            ),
-            eta=converted_datetime - datetime.timedelta(minutes=10)
-        )
+        notification_dict = [
+            {
+                'title': 'Booking Reminder',
+                'message': f'Hi {name}, your booking will end in 10 minutes',
+                'user_id': instance.user.user_id,
+                'booking_id': None,
+                'eta': converted_datetime - datetime.timedelta(minutes=10)
+            },
+            {
+                'title': 'Booking Reminder',
+                'message': f'Hi {name}, your booking has ended',
+                'user_id': instance.user.user_id,
+                'booking_id': instance.booking_id,
+                'eta': converted_datetime
+            }
+        ]
+
+        for notification in notification_dict:
+            send_scheduled_notification.apply_async(
+                (
+                    notification['title'],
+                    notification['message'],
+                    notification['user_id'],
+                    notification['booking_id'],
+                ),
+                eta=notification['eta']
+            )
 
     elif instance.booking_status == "rejected":
         title = "Booking Rejected"
