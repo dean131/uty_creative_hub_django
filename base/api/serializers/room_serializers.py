@@ -12,6 +12,12 @@ class RoomModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RoomBookingHistoryModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ['room_name']
+
+
 class RoomListModelSerializer(serializers.ModelSerializer):
     roomimages = serializers.SerializerMethodField()
     class Meta:

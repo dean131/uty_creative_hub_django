@@ -1,7 +1,5 @@
 import json
-
-from django.db.models import Q
-from django.db import transaction
+import datetime
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +10,7 @@ from base.models import Booking, BookingMember
 from base.api.serializers.booking_serializers import (
     BookingModelSerializer,
     BookingDetailModelSerializer,
+    BookingHistoryModelSerializer,
 )
 
 
@@ -23,6 +22,8 @@ class BookingModelViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return BookingDetailModelSerializer
+        if self.action == 'history':
+            return BookingHistoryModelSerializer
         return super().get_serializer_class()
 
     def list(self, request, *args, **kwargs):
@@ -165,3 +166,30 @@ class BookingModelViewSet(ModelViewSet):
             message='Booking history fetched successfully',
             data=serializer.data
         )
+
+    @action(methods=['POST'], detail=True)
+    def scan(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            date_time = datetime.datetime.now()
+            booking_date = instance.booking_date
+            booking_start_time = instance.bookingtime.start_time
+            booking_end_time = instance.bookingtime.end_time
+
+            start_date_time = datetime.datetime.combine(booking_date, booking_start_time)
+            end_date_time = datetime.datetime.combine(booking_date, booking_end_time)
+            
+            is_time_valid = (date_time >= start_date_time) and (date_time <= end_date_time)
+            if not is_time_valid:
+                return CustomResponse.bad_request(
+                    message='Booking time is not valid',
+                )
+            
+            return CustomResponse.ok(
+                message='Booking time is valid',
+            )
+        except:
+            return CustomResponse.not_found(
+                message='Booking not found',
+            )
+
