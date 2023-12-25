@@ -61,6 +61,11 @@ class BookingModelViewSet(ModelViewSet):
             user=request.user,
             booking_status='initiated',
         ).first()
+
+        if not bookinginit:
+            return CustomResponse.bad_request(
+                message='Booking is not initiated yet',
+            )
         
 
         for bookingtime_id in bookingtime_id_list:
