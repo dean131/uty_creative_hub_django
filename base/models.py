@@ -95,7 +95,7 @@ class Booking(models.Model):
         ("initiated", "Initiated"),
         ("pending", "Pending"),
         ("active", "Active"),
-        ("done", "Done"),
+        ("completed", "Completed"),
         ("rejected", "Rejected"),
     )
 

@@ -1,4 +1,4 @@
-import datetime
+import json
 
 from django.db.models import Q
 from django.db import transaction
@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from myapp.my_utils.custom_response import CustomResponse
-from base.models import Booking, BookingTime, BookingMember
+from base.models import Booking, BookingMember
 from base.api.serializers.booking_serializers import (
     BookingModelSerializer,
     BookingDetailModelSerializer,
@@ -53,7 +53,7 @@ class BookingModelViewSet(ModelViewSet):
 
     # @transaction.atomic
     def create(self, request, *args, **kwargs):
-        bookingtime_id_list = request.data.get('bookingtime_id_list')
+        bookingtime_id_list = json.loads(request.data.get('bookingtime_id_list'))
         booking_needs = request.data.get('booking_needs')
 
         bookinginit = self.get_queryset().filter(
@@ -75,7 +75,6 @@ class BookingModelViewSet(ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             if serializer.is_valid():
                 booking = serializer.save()
-                print(booking)
                 bookingmembers = bookinginit.bookingmember_set.exclude(
                     user=request.user
                 )

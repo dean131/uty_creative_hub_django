@@ -54,7 +54,6 @@ class BookingTimeModelViewSet(ModelViewSet):
         # End of checking
         context = self.get_serializer_context()
         context['available_bookingtimes'] = available_bookingtimes
-        print(context)
         serializer = self.get_serializer(
             queryset, 
             many=True,
