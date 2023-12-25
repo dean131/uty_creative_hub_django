@@ -13,14 +13,17 @@ class RatingModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if self.get_queryset().filter(
-            user=request.user.user_id,
-            room__room_id=request.data.get('room'),
+            user=request.user,
+            room__room_id=request.data.get('room_id'),
             ).exists():
             return CustomResponse.bad_request(
                 message='You have rated this article before',
             )
             
-        request.data.update({'user': request.user.user_id})
+        request.data.update({
+            'user': request.user.user_id,
+            'room': request.data.get('room_id'),
+        })
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)

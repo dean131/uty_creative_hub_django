@@ -4,6 +4,12 @@ from base.models import Rating
 
 
 class RatingModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = '__all__'
+
+
+class RatingDetailModelSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     class Meta:
         model = Rating

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from base.api.serializers.rating_serializers import RatingModelSerializer
+from base.api.serializers.rating_serializers import RatingDetailModelSerializer
 from base.api.serializers.roomfacility_serializers import RoomFacilityModelSerializer
 from base.api.serializers.roomimage_serializers import RoomImageModelSerializer
 from base.models import Room, Rating, RoomFacility
@@ -62,7 +62,7 @@ class RoomDetailModelSerializer(serializers.ModelSerializer):
 
     def get_ratings(self, obj):
         ratings = obj.rating_set.all()
-        return RatingModelSerializer(ratings, many=True).data
+        return RatingDetailModelSerializer(ratings, many=True).data
     
     def get_facilities(self, obj):
         facilities = RoomFacility.objects.filter(room=obj)
