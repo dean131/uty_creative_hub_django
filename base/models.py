@@ -151,6 +151,7 @@ class Banner(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+
 ### SIGNALS ###
 @receiver(post_save, sender=Booking)
 def create_bookingmember(sender, instance, created, **kwargs):

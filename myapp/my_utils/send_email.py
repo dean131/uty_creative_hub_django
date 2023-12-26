@@ -13,3 +13,7 @@ def send_otp(email_dest, otp_code, name=None):
         )
     email.content_subtype = "html"
     email.send(fail_silently=False)
+
+
+
+    
