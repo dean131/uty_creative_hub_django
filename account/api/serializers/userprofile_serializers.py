@@ -22,3 +22,9 @@ class UserProfileBookingDetailModelSerializer(serializers.ModelSerializer):
     def get_faculty(self, obj):
         return obj.faculty.faculty_name
 
+
+class UserProfileUserDetailModelSerializer(UserProfileBookingDetailModelSerializer):
+    class Meta:
+        model = UserProfile
+        exclude = ['user']
+    

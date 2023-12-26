@@ -15,6 +15,7 @@ from account.api.serializers.user_serializers import (
     UserModelSerializer,
     UserRegisterSerializer,
     UserListSerializer,
+    UserDetailModelSerializer
 )
 from account.api.serializers.userprofile_serializers import (
     UserProfileModelSerializer,
@@ -33,6 +34,8 @@ class UserModelViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return UserListSerializer
+        if self.action == 'retrieve':
+            return UserDetailModelSerializer
         return super().get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
