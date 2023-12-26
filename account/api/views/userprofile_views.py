@@ -68,8 +68,34 @@ class UserProfileModelViewSet(ModelViewSet):
     
     @action(methods=['post'], detail=False)
     def update_profile(self, request, *args, **kwargs):
-        return CustomResponse.ok(
+        full_name = request.data.get('full_name')
+        whatsapp_number = request.data.get('whatsapp_number')
+        birth_date = request.data.get('birth_date')
+        profile_pic = request.FILES.get('profile_pic')
+
+        user = request.user
+        userprofile = self.queryset.filter(user=user).first()
+
+        if full_name:
+            user.full_name = full_name
+
+        if whatsapp_number:
+            userprofile.whatsapp_number = whatsapp_number
+
+        if birth_date:
+            userprofile.birth_date = birth_date
+
+        if profile_pic:
+            userprofile.profile_pic = profile_pic
+
+        user = user.save()
+
+        serializer = self.get_serializer(userprofile)
+
+        return CustomResponse.updated(
             message='Profile updated successfully',
+            data=serializer.data,
         )
+
         
         

@@ -269,6 +269,32 @@ class UserModelViewSet(ModelViewSet):
             message='Password has been changed',
         )
 
+    @action(methods=['POST'], detail=False)
+    def change_email(self, request):
+        otp_code = request.data.get('otp')
+        email = request.data.get('email')
+
+        otp_obj = OTPCode.objects.filter(code=otp_code, user__email=email).first()
+        if not otp_obj:
+            return CustomResponse.bad_request(
+                message='OTP Code is invalid',
+            )
+
+        if timezone.now() > otp_obj.expire:
+            return CustomResponse.bad_request(
+                message='OTP Code is expired',
+            )
+        
+        user = request.user
+        user.email = email
+        user.save()
+            
+        serializer = self.get_serializer(otp_obj.user)
+        return CustomResponse.retrieve(
+            message='Email is verified',
+            data=serializer.data,
+        )
+
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
     def get_otp_email_validation(self, request):
         email = request.data.get('email')
@@ -341,6 +367,47 @@ class UserModelViewSet(ModelViewSet):
         return CustomResponse.not_found(
             message='OTP Code is not Found',
         )    
+
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    def get_otp_change_email(self, request):
+        email = request.data.get('email')
+        otp_code = random.randint(1000, 9999)
+
+        # EMAIL VALIDATOR
+        if not email:
+            return CustomResponse.bad_request(
+                message='Email is required',
+            )
+        
+        if '@' not in email:
+            return CustomResponse.bad_request(
+                message='Email must be contain @',
+            )
+        
+        user = User.objects.filter(email=email, is_active=True).first()
+        if not user:
+            return CustomResponse.bad_request(
+                message='Email is not found',
+            )
+        # END EMAIL VALIDATOR
+
+        otp_obj = OTPCode.objects.filter(
+            user__email=email, 
+            user__is_active=True, 
+        ).first()
+        if otp_obj:
+            otp_obj.code = otp_code
+            otp_obj.save()
+
+            send_otp(email, otp_code, user.full_name)
+
+            return CustomResponse.ok(
+                message='OTP Code has been sent to your email',
+            )
+        
+        return CustomResponse.not_found(
+            message='OTP Code is not Found',
+        )
 
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
     def forgot_password(self, request):
