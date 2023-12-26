@@ -23,6 +23,7 @@ class Notification(models.Model):
     notification_id = models.AutoField(primary_key=True, unique=True, editable=False)
     notification_title = models.CharField(max_length=255)
     notification_body = models.TextField()
+    notification_type = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None, null=True, blank=True)
@@ -38,6 +39,7 @@ def create_notification(sender, instance, created, **kwargs):
             'notification',
             {
                 'type': 'push.notification',
+                'notification_type': instance.notification_type,
                 'receiver': user_id,
                 'title': instance.notification_title,
                 'message': instance.notification_body,
@@ -69,6 +71,7 @@ def send_notification(sender, instance, **kwargs):
         message = f"Hi {name}, your account has been rejected."
 
     Notification.objects.create(
+        notification_type='User Verification',
         notification_title=title,
         notification_body=message,
         user=instance
@@ -79,6 +82,7 @@ def userprofile_notification(sender, instance, created, **kwargs):
     if created:
         name = name_formater(instance.user.full_name)
         Notification.objects.create(
+            notification_type='Registration',
             notification_title="Registration Submitted",
             notification_body=f"Hi {name}, your registration has been submitted and waiting for approval.",
             user=instance.user
@@ -111,6 +115,7 @@ def booking_status_notification(sender, instance, **kwargs):
         
         for bookingmember in bookingmembers:
             Notification.objects.create(
+                notification_type='Booking',
                 notification_title='Added to Booking',
                 notification_body=f"Hi {name_formater(bookingmember['user__full_name'])}, you have been added to a booking by {name} on {instance.booking_date} in {instance.room.room_name}.",
                 user=User.objects.filter(user_id=bookingmember['user__user_id']).first()
@@ -180,6 +185,7 @@ def booking_status_notification(sender, instance, **kwargs):
         message = f"Hi {name}, your booking has been done."
         
     Notification.objects.create(
+        notification_type='Booking',
         notification_title=title,
         notification_body=message,
         user=instance.user
@@ -189,6 +195,7 @@ def booking_status_notification(sender, instance, **kwargs):
 def article_notification(sender, instance, created, **kwargs):
     if created:
         Notification.objects.create(
+            notification_type='Article',
             notification_title=instance.article_title,
             notification_body=instance.article_body,
         )

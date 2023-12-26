@@ -10,6 +10,7 @@ import base.models
 def send_scheduled_notification(title, body, user_id, booking_id=None):
     user = account.models.User.objects.filter(user_id=user_id).first()
     notification.models.Notification.objects.create(
+        notification_type='Booking',
         notification_title=title,
         notification_body=body,
         user=user

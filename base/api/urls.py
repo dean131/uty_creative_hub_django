@@ -12,6 +12,7 @@ from .views import (
     faculty_views,
     roomimage_views,
     studyprogram_views,
+    banner_views,
 )
 
 router = DefaultRouter()
@@ -24,6 +25,7 @@ router.register('bookingmembers', bookingmember_views.BookingMemberModelViewSet,
 router.register('faculties', faculty_views.FacultyModelViewSet, basename='faculty')
 router.register('roomimages', roomimage_views.RoomImageModelViewSet, basename='roomimage')
 router.register('studyprograms', studyprogram_views.StudyProgramModelViewSet, basename='studyprogram')
+router.register('banners', banner_views.BannerModelViewSet, basename='banner')
 
 urlpatterns = [
     path('', include(router.urls))
