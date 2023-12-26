@@ -36,7 +36,7 @@
     <script>
         const notifContainer = document.querySelector('.notif-container');
 
-        const host = '127.0.0.1:8000'
+        const host = '0.tcp.ap.ngrok.io:10883'
         const notifSocket = new WebSocket(`ws://${host}/ws/notification/`);
 
         notifSocket.onopen = function(e) {
