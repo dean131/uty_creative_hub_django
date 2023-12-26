@@ -12,14 +12,11 @@ from base.models import (
     Booking,
 )
 
-from .tasks import send_scheduled_notification
 from django.utils import timezone
 import datetime
+from .tasks import send_scheduled_notification
 
-
-def name_formater(full_name):
-    full_name = full_name.split(' ')
-    return full_name[1] if (len(full_name[0]) < 3 and len(full_name) > 1) else full_name[0]
+from myapp.my_utils.string_formater import name_formater
 
 
 class Notification(models.Model):
