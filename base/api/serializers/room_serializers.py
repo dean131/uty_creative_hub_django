@@ -78,7 +78,7 @@ class RoomDetailBookingModelSerializer(serializers.ModelSerializer):
     is_rated = serializers.SerializerMethodField()
     class Meta:
         model = Room
-        fields = ['room_name', 'is_rated', 'room_capacity', 'room_images']
+        fields = ['room_id', 'room_name', 'is_rated', 'room_capacity', 'room_images']
 
     def get_room_images(self, obj):
         room_image = obj.roomimage_set.all()
