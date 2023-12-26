@@ -65,7 +65,6 @@ class UserProfileModelViewSet(ModelViewSet):
             )
         return CustomResponse.serializers_erros(errors=serializer.errors)
       
-    
     @action(methods=['post'], detail=False)
     def update_profile(self, request, *args, **kwargs):
         full_name = request.data.get('full_name')
