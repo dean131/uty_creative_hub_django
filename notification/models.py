@@ -149,6 +149,13 @@ def booking_status_notification(sender, instance, **kwargs):
             },
             {
                 'title': 'Booking Reminder',
+                'message': f'Hi {name}, your booking will end in 5 minutes',
+                'user_id': instance.user.user_id,
+                'booking_id': None,
+                'eta': converted_datetime - datetime.timedelta(minutes=5)
+            },
+            {
+                'title': 'Booking Reminder',
                 'message': f'Hi {name}, your booking has ended',
                 'user_id': instance.user.user_id,
                 'booking_id': instance.booking_id,
