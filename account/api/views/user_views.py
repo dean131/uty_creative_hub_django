@@ -271,7 +271,7 @@ class UserModelViewSet(ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def change_email(self, request):
-        otp_code = request.data.get('otp')
+        otp_code = request.data.get('otp_code')
         email = request.data.get('email')
 
         otp_obj = OTPCode.objects.filter(code=otp_code, user__email=email).first()
@@ -291,8 +291,34 @@ class UserModelViewSet(ModelViewSet):
             
         serializer = self.get_serializer(otp_obj.user)
         return CustomResponse.retrieve(
-            message='Email is verified',
+            message='Email is changed',
             data=serializer.data,
+        )
+
+    @action(methods=['POST'], detail=False)
+    def password_validation(self, request):
+        password = request.data.get('password')
+        user = request.user
+
+        # PASSWORD VALIDATOR
+        if not password:
+            return CustomResponse.bad_request(
+                message='Password is required',
+            )
+        
+        if len(password) < 8:
+            return CustomResponse.bad_request(
+                message='Password must be at least 8 characters',
+            )
+        
+        if not user.check_password(password):
+            return CustomResponse.bad_request(
+                message='Password is wrong',
+            )
+        # END PASSWORD VALIDATOR
+
+        return CustomResponse.ok(
+            message='Password is valid',
         )
 
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
