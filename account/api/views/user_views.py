@@ -274,8 +274,9 @@ class UserModelViewSet(ModelViewSet):
         otp_code = request.data.get('otp_code')
         email = request.data.get('email')
 
-        otp_obj = OTPCode.objects.filter(code=otp_code, user__email=email).first()
-        if not otp_obj:
+        user = request.user
+        otp_obj = OTPCode.objects.filter(user=user).first()
+        if otp_obj.code != otp_code:
             return CustomResponse.bad_request(
                 message='OTP Code is invalid',
             )
