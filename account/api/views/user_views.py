@@ -321,7 +321,7 @@ class UserModelViewSet(ModelViewSet):
             message='Password is valid',
         )
 
-    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
+    @action(methods=['POST'], detail=False)
     def get_otp_email_validation(self, request):
         email = request.data.get('email')
         otp_code = random.randint(1000, 9999)
@@ -409,18 +409,10 @@ class UserModelViewSet(ModelViewSet):
             return CustomResponse.bad_request(
                 message='Email must be contain @',
             )
-        
-        user = User.objects.filter(email=email, is_active=True).first()
-        if not user:
-            return CustomResponse.bad_request(
-                message='Email is not found',
-            )
         # END EMAIL VALIDATOR
 
-        otp_obj = OTPCode.objects.filter(
-            user__email=email, 
-            user__is_active=True, 
-        ).first()
+        user = request.user
+        otp_obj = OTPCode.objects.filter(user=user).first()
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
