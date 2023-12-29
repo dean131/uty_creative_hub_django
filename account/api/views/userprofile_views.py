@@ -87,7 +87,7 @@ class UserProfileModelViewSet(ModelViewSet):
         if profile_pic:
             userprofile.profile_pic = profile_pic
 
-        user = user.save()
+        userprofile = userprofile.save()
 
         serializer = self.get_serializer(userprofile)
 
