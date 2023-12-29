@@ -53,11 +53,11 @@ class UserListSerializer(UserModelSerializer):
 
     def get_userprofile(self, obj):
         if obj.userprofile:
-            return UserProfileModelSerializer(obj.userprofile).data
+            return UserProfileModelSerializer(obj.userprofile, context=self.context).data
         return None
     
     def get_first_name(self, obj):
-        return obj.first_name
+        return name_formater(obj.full_name)
 
 
 class UserRegisterSerializer(UserModelSerializer):
