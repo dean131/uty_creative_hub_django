@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import permissions
 
@@ -16,7 +18,10 @@ class NotificationModelViewSet(ModelViewSet):
 
         user_id = request.query_params.get('user_id', None)
         if user_id is not None:
-            queryset = queryset.filter(user__user_id=user_id)
+            queryset = queryset.filter(
+                Q(user__user_id=user_id) |
+                Q(user__user_id=None)
+            ).order_by('created_at')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
