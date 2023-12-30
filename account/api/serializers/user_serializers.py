@@ -40,7 +40,7 @@ class UserDetailModelSerializer(UserModelSerializer):
 
     def get_userprofile(self, obj):
         if obj.userprofile:
-            return UserProfileUserDetailModelSerializer(obj.userprofile).data
+            return UserProfileUserDetailModelSerializer(obj.userprofile, context=self.context).data
         return None
     
     def get_first_name(self, obj):
