@@ -1,4 +1,5 @@
 from django.db.models import Q
+import datetime
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -48,7 +49,7 @@ class BookingTimeModelViewSet(ModelViewSet):
             room__room_id=room_id,
         ).values_list('bookingtime', flat=True)
 
-        available_bookingtimes = queryset.exclude(
+        available_bookingtimes = queryset.filter(start_time__gte=datetime.datetime.now().time()).exclude(
             bookingtime_id__in=bookingtime_ids
         )
         # End of checking
