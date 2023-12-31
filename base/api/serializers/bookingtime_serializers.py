@@ -17,10 +17,7 @@ class BookingTimeAvaliableModelSerializer(BookingTimeModelSerializer):
     is_available = serializers.SerializerMethodField()
 
     def get_is_available(self, obj):
-        
-        time_now = "09:30:00"
-        time_now = datetime.datetime.strptime(time_now, '%H:%M:%S').time()
-
+        time_now = datetime.datetime.now().time()
         date_now = self.context['request'].query_params.get('date')
 
         available_bookingtimes = self.context.get('available_bookingtimes')
