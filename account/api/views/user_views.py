@@ -487,7 +487,7 @@ class UserModelViewSet(ModelViewSet):
             message='Password has been changed',
         )
 
-    @action(methods=['POST'], detail=False)
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
     def get_otp_change_privacy_key(self, request):
         email = request.data.get('email')
         otp_code = random.randint(1000, 9999)
@@ -504,13 +504,12 @@ class UserModelViewSet(ModelViewSet):
             )
         # END EMAIL VALIDATOR
 
-        user = request.user
-        otp_obj = OTPCode.objects.filter(user=user).first()
+        otp_obj = OTPCode.objects.filter(user__email=email).first()
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp(email, otp_code, user.full_name)
+            send_otp(email, otp_code, otp_obj.user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
