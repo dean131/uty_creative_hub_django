@@ -1,4 +1,3 @@
-# tasks.py
 from celery import shared_task
 
 
@@ -20,5 +19,7 @@ def send_scheduled_notification(title, body, user_id, booking_id=None):
         booking = base.models.Booking.objects.filter(booking_id=booking_id).first()
         booking.booking_status = "completed"
         booking.save()
+
+    return True
     
     

@@ -25,6 +25,8 @@ from account.models import OTPCode, User
 from myapp.my_utils.send_email import send_otp
 from myapp.my_utils.custom_response import CustomResponse
 
+from account.tasks import send_otp_celery
+
 
 class UserModelViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -102,7 +104,7 @@ class UserModelViewSet(ModelViewSet):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-            send_otp(email_dest, otp_code)
+            send_otp_celery(email_dest, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -114,7 +116,7 @@ class UserModelViewSet(ModelViewSet):
                 code=otp_code,
                 user=user,
             )
-            send_otp(email_dest, otp_code)
+            send_otp_celery(email_dest, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -349,7 +351,7 @@ class UserModelViewSet(ModelViewSet):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-            send_otp(email, otp_code)
+            send_otp_celery(email, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -385,7 +387,7 @@ class UserModelViewSet(ModelViewSet):
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp(email, otp_code, user.full_name)
+            send_otp_celery.delay(email, otp_code, user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
@@ -418,7 +420,7 @@ class UserModelViewSet(ModelViewSet):
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp(email, otp_code, user.full_name)
+            send_otp_celery(email, otp_code, user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
@@ -509,7 +511,7 @@ class UserModelViewSet(ModelViewSet):
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp(email, otp_code, otp_obj.user.full_name)
+            send_otp_celery.delay(email, otp_code, otp_obj.user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
