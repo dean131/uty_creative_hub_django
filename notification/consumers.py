@@ -16,12 +16,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
-    # Receive message from room group
-    async def notification_message(self, event):
-        message = event["message"]
+    # # Receive message from room group
+    # async def notification_message(self, event):
+    #     message = event["message"]
 
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({"message": message}))
+    #     # Send message to WebSocket
+    #     await self.send(text_data=json.dumps({"message": message}))
 
     async def push_notification(self, event):
         # Send message to WebSocket
