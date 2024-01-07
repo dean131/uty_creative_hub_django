@@ -7,13 +7,13 @@ from rest_framework.decorators import action
 from account.models import UserProfile, User
 from myapp.my_utils.custom_response import CustomResponse
 from account.api.serializers.userprofile_serializers import (
-    UserProfileModelSerializer
+    UserProfileSerializer
 )
 
 
 class UserProfileModelViewSet(ModelViewSet):
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileModelSerializer
+    serializer_class = UserProfileSerializer
 
     def get_permissions(self):
         if self.action == 'create':

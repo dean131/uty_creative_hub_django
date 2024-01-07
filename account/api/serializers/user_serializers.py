@@ -2,15 +2,15 @@ from rest_framework import serializers
 
 from account.models import User
 from account.api.serializers.userprofile_serializers import (
-    UserProfileBookingDetailModelSerializer,
-    UserProfileModelSerializer,
-    UserProfileUserDetailModelSerializer
+    UserProfileBookingDetailSerializer,
+    UserProfileSerializer,
+    UserProfileUserDetailSerializer
 )
 
 from myapp.my_utils.string_formater import name_formater
 
 
-class UserModelSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
@@ -21,7 +21,7 @@ class UserModelSerializer(serializers.ModelSerializer):
         }
 
 
-class UserDetailModelSerializer(UserModelSerializer):
+class UserDetailSerializer(UserSerializer):
     userprofile = serializers.SerializerMethodField()
     first_name = serializers.SerializerMethodField()
 
@@ -40,27 +40,27 @@ class UserDetailModelSerializer(UserModelSerializer):
 
     def get_userprofile(self, obj):
         if obj.userprofile:
-            return UserProfileUserDetailModelSerializer(obj.userprofile, context=self.context).data
+            return UserProfileUserDetailSerializer(obj.userprofile, context=self.context).data
         return None
     
     def get_first_name(self, obj):
         return name_formater(obj.full_name)
 
 
-class UserListSerializer(UserModelSerializer):
+class UserListSerializer(UserSerializer):
     userprofile = serializers.SerializerMethodField()
     first_name = serializers.SerializerMethodField()
 
     def get_userprofile(self, obj):
         if obj.userprofile:
-            return UserProfileModelSerializer(obj.userprofile, context=self.context).data
+            return UserProfileSerializer(obj.userprofile, context=self.context).data
         return None
     
     def get_first_name(self, obj):
         return name_formater(obj.full_name)
 
 
-class UserRegisterSerializer(UserModelSerializer):
+class UserRegisterSerializer(UserSerializer):
     class Meta:
         model = User
         fields = ['full_name', 'email', 'password']
@@ -70,8 +70,8 @@ class UserRegisterSerializer(UserModelSerializer):
         return user
     
 
-class UserBookingDetailModelSerializer(serializers.ModelSerializer):
-    userprofile = UserProfileBookingDetailModelSerializer()
+class UserBookingDetailSerializer(serializers.ModelSerializer):
+    userprofile = UserProfileBookingDetailSerializer()
     class Meta:
         model = User
         fields = ['full_name', 'email', 'userprofile']

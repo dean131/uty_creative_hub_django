@@ -12,13 +12,13 @@ from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from account.api.serializers.user_serializers import (
-    UserModelSerializer,
+    UserSerializer,
     UserRegisterSerializer,
     UserListSerializer,
-    UserDetailModelSerializer
+    UserDetailSerializer
 )
 from account.api.serializers.userprofile_serializers import (
-    UserProfileModelSerializer,
+    UserProfileSerializer,
 )
 
 from account.models import OTPCode, User
@@ -30,14 +30,14 @@ from account.tasks import send_otp_celery
 
 class UserModelViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserModelSerializer
+    serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action == 'list':
             return UserListSerializer
         if self.action == 'retrieve':
-            return UserDetailModelSerializer
+            return UserDetailSerializer
         return super().get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
@@ -181,7 +181,7 @@ class UserModelViewSet(ModelViewSet):
         refresh['verification_status'] = authenticated_user.verification_status
 
         try:
-            refresh['userprofile'] = UserProfileModelSerializer(authenticated_user.userprofile).data
+            refresh['userprofile'] = UserProfileSerializer(authenticated_user.userprofile).data
         except:
             pass
 

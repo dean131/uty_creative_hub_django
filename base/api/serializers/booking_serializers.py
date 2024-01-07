@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from base.models import Booking
 from account.api.serializers.user_serializers import (
-    UserBookingDetailModelSerializer,
+    UserBookingDetailSerializer,
 )
 
 from base.api.serializers.room_serializers import (
@@ -42,7 +42,7 @@ class BookingHistoryModelSerializer(serializers.ModelSerializer):
 
 
 class BookingDetailModelSerializer(serializers.ModelSerializer):
-    user = UserBookingDetailModelSerializer()
+    user = UserBookingDetailSerializer()
     room = RoomDetailBookingModelSerializer()
     bookingtime = BookingTimeModelSerializer()
     bookingmember = serializers.SerializerMethodField()

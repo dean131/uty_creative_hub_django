@@ -3,13 +3,13 @@ from rest_framework import serializers
 from account.models import UserProfile
 
 
-class UserProfileModelSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
 
 
-class UserProfileBookingDetailModelSerializer(serializers.ModelSerializer):
+class UserProfileBookingDetailSerializer(serializers.ModelSerializer):
     studyprogram = serializers.SerializerMethodField()
     faculty = serializers.SerializerMethodField()
     class Meta:
@@ -23,7 +23,7 @@ class UserProfileBookingDetailModelSerializer(serializers.ModelSerializer):
         return obj.faculty.faculty_name
 
 
-class UserProfileUserDetailModelSerializer(UserProfileBookingDetailModelSerializer):
+class UserProfileUserDetailSerializer(UserProfileBookingDetailSerializer):
     class Meta:
         model = UserProfile
         exclude = ['user']

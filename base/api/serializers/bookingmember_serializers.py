@@ -3,7 +3,7 @@ from rest_framework import serializers
 from base.models import BookingMember
 
 from account.api.serializers.user_serializers import (
-    UserBookingDetailModelSerializer
+    UserBookingDetailSerializer
 )
 
 
@@ -14,7 +14,7 @@ class BookingMemberModelSerializer(serializers.ModelSerializer):
 
 
 class BookingMemberBookingDetailSerializer(serializers.ModelSerializer):
-    user = UserBookingDetailModelSerializer()
+    user = UserBookingDetailSerializer()
     class Meta:
         model = BookingMember
         exclude = ['booking', 'created_at']
