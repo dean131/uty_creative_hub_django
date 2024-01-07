@@ -11,7 +11,7 @@ from account.api.serializers.userprofile_serializers import (
 )
 
 
-class UserProfileModelViewSet(ModelViewSet):
+class UserProfileViewSet(ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 

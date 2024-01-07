@@ -28,7 +28,7 @@ from myapp.my_utils.custom_response import CustomResponse
 from account.tasks import send_otp_celery
 
 
-class UserModelViewSet(ModelViewSet):
+class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
