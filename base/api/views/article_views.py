@@ -2,13 +2,13 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
 from myapp.my_utils.custom_response import CustomResponse
-from base.api.serializers.article_serializers import ArticleModelSerializer
+from base.api.serializers.article_serializers import ArticleSerializer
 from base.models import Article
 
 
 class ArticleModelViewSet(ModelViewSet):
     queryset = Article.objects.all()
-    serializer_class = ArticleModelSerializer
+    serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
