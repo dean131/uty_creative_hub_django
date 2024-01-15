@@ -1,14 +1,14 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
-from base.api.serializers.banner_serializers import BannerModelSerializer
+from base.api.serializers.banner_serializers import BannerSerializer
 from base.models import Banner
 from myapp.my_utils.custom_response import CustomResponse
 
 
 class BannerModelViewSet(ModelViewSet):
     queryset = Banner.objects.all()
-    serializer_class = BannerModelSerializer
+    serializer_class = BannerSerializer
     permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
