@@ -12,7 +12,7 @@ from base.api.serializers.room_serializers import (
 from base.api.serializers.bookingtime_serializers import BookingTimeModelSerializer
 from base.api.serializers.bookingmember_serializers import BookingMemberBookingDetailSerializer
 
-class BookingModelSerializer(serializers.ModelSerializer):
+class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = '__all__'

@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from myapp.my_utils.custom_response import CustomResponse
 from base.models import Booking, BookingMember
 from base.api.serializers.booking_serializers import (
-    BookingModelSerializer,
+    BookingSerializer,
     BookingDetailModelSerializer,
     BookingHistoryModelSerializer,
 )
@@ -16,7 +16,7 @@ from base.api.serializers.booking_serializers import (
 
 class BookingModelViewSet(ModelViewSet):
     queryset = Booking.objects.all()
-    serializer_class = BookingModelSerializer
+    serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
