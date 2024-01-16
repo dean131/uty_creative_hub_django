@@ -18,7 +18,7 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class BookingHistoryModelSerializer(serializers.ModelSerializer):
+class BookingHistorySerializer(serializers.ModelSerializer):
     room = RoomBookingHistoryModelSerializer()
     bookingtime = BookingTimeModelSerializer()
     booking_day = serializers.SerializerMethodField()

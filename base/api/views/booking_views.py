@@ -10,7 +10,7 @@ from base.models import Booking, BookingMember
 from base.api.serializers.booking_serializers import (
     BookingSerializer,
     BookingDetailModelSerializer,
-    BookingHistoryModelSerializer,
+    BookingHistorySerializer,
 )
 
 
@@ -23,7 +23,7 @@ class BookingModelViewSet(ModelViewSet):
         if self.action == 'retrieve':
             return BookingDetailModelSerializer
         if self.action == 'history':
-            return BookingHistoryModelSerializer
+            return BookingHistorySerializer
         return super().get_serializer_class()
 
     def list(self, request, *args, **kwargs):
