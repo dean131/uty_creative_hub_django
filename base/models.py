@@ -26,7 +26,7 @@ class StudyProgram(models.Model):
 
 class Room(models.Model):
     ROOM_TYPE = (
-        ("meeting_room", "Meeting Room"),
+        ("Meeting Room", "Meeting Room"),
     )
 
     room_id = models.AutoField(primary_key=True, unique=True, editable=False)
