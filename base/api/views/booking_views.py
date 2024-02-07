@@ -174,27 +174,36 @@ class BookingModelViewSet(ModelViewSet):
 
     @action(methods=['POST'], detail=True)
     def scan(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            date_time = datetime.datetime.now()
-            booking_date = instance.booking_date
-            booking_start_time = instance.bookingtime.start_time
-            booking_end_time = instance.bookingtime.end_time
+        user = request.user
+        now = datetime.datetime.now()
+        date_now =  now.date()
+        time_now = now.time()
+        booking = Booking.objects.filter(
+            user=user, 
+            booking_date=date_now, 
+            booking_status='active').order_by('bookingtime__start_time').first()
 
-            start_date_time = datetime.datetime.combine(booking_date, booking_start_time)
-            end_date_time = datetime.datetime.combine(booking_date, booking_end_time)
-            
-            is_time_valid = (date_time >= start_date_time) and (date_time <= end_date_time)
-            if not is_time_valid:
-                return CustomResponse.bad_request(
-                    message='Booking time is not valid',
-                )
-            
-            return CustomResponse.ok(
-                message='Booking time is valid',
+        if not booking:
+            return CustomResponse.bad_request(
+                message='Booking tidak ditemukan',
             )
-        except:
-            return CustomResponse.not_found(
-                message='Booking not found',
+        
+        bookingtime = booking.bookingtime
+        start_time = bookingtime.start_time
+        end_time = bookingtime.end_time
+        
+        if time_now < start_time:
+            return CustomResponse.bad_request(
+                message=f'Waktu booking belum dimulai, waktu booking dimulai pada {start_time}',
             )
+        
+        if time_now > end_time:
+            return CustomResponse.bad_request(
+                message='Waktu booking sudah berakhir',
+            )
+        
+        return CustomResponse.ok(
+            message='Berhasil scan QR Code',
+        )
+
 

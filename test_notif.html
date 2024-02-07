@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
         h1 {
             text-align: center;
         }
+
         .notif-container {
             width: 100%;
             height: 100vh;
@@ -16,12 +18,13 @@
             align-items: center;
             justify-content: center;
         }
+
         .notif {
             width: 600px;
             height: 50px;
             background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             margin-bottom: 10px;
             display: flex;
             align-items: center;
@@ -29,6 +32,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>TEST NOTIFICATION</h1>
     <div class="notif-container"></div>
@@ -36,15 +40,15 @@
     <script>
         const notifContainer = document.querySelector('.notif-container');
 
-        // const host = '0.tcp.ap.ngrok.io:18498'
-        const host = '127.0.0.1:8000'
+        const host = '0.tcp.ap.ngrok.io:19801'
+        // const host = '127.0.0.1:8000'
         const notifSocket = new WebSocket(`ws://${host}/ws/notification/`);
 
-        notifSocket.onopen = function(e) {
+        notifSocket.onopen = function (e) {
             console.log('Connection established');
         }
 
-        notifSocket.onmessage = function(e) {
+        notifSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
             console.log(data);
             notifContainer.innerHTML += `
@@ -54,9 +58,10 @@
             `;
         }
 
-        notifSocket.onclose = function(e) {
+        notifSocket.onclose = function (e) {
             console.log('Connection closed');
         }
     </script>
 </body>
+
 </html>
