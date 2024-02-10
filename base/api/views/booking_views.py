@@ -1,6 +1,8 @@
 import json
 import datetime
 
+import paho.mqtt.client as mqtt
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -13,11 +15,25 @@ from base.api.serializers.booking_serializers import (
     BookingHistorySerializer,
 )
 
+# MQTT Helper
+def on_connect(mqtt_client, userdata, flags, rc):
+    if rc == 0:
+        print('Connected successfully')
+        mqtt_client.subscribe('django/mqtt')
+    else:
+        print('Bad connection. Code:', rc)
+
+def on_message(mqtt_client, userdata, msg):
+    print(f'Received message on topic: {msg.topic} with payload: {msg.payload}')
+
+
 
 class BookingModelViewSet(ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = '__all__'
+    ordering_fields = '__all__'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -138,9 +154,23 @@ class BookingModelViewSet(ModelViewSet):
     
     @action(methods=['POST'], detail=False)
     def validate(self, request, *args, **kwargs):
-        if request.user.verification_status != 'verified':
+        user_status = request.user.verification_status
+        
+        if user_status == 'verified':
+            return CustomResponse.ok(
+                message='User is verified',
+            )
+        if user_status == 'pending':
             return CustomResponse.bad_request(
-                message='User is not verified',
+                message='User is not verified yet',
+            )
+        if user_status == 'rejected':
+            return CustomResponse.bad_request(
+                message='User is rejected',
+            )
+        if user_status == 'suspend':
+            return CustomResponse.bad_request(
+                message='User is suspended',
             )
 
         return CustomResponse.ok(
@@ -173,34 +203,60 @@ class BookingModelViewSet(ModelViewSet):
         )
 
     @action(methods=['POST'], detail=True)
-    def scan(self, request, *args, **kwargs):
-        user = request.user
-        now = datetime.datetime.now()
-        date_now =  now.date()
-        time_now = now.time()
-        booking = Booking.objects.filter(
-            user=user, 
-            booking_date=date_now, 
-            booking_status='active').order_by('bookingtime__start_time').first()
+    def change_booking_status(self, request, *args, **kwargs):
+        booking = self.get_object()
+        booking_status = request.data.get('booking_status')
 
-        if not booking:
+        if not booking_status:
             return CustomResponse.bad_request(
-                message='Booking tidak ditemukan',
+                message='Booking status diperlukan',
             )
         
-        bookingtime = booking.bookingtime
-        start_time = bookingtime.start_time
-        end_time = bookingtime.end_time
-        
-        if time_now < start_time:
+        if booking_status not in ['initiated', 'pending', 'active', 'rejected', 'cancelled', 'completed']:
             return CustomResponse.bad_request(
-                message=f'Waktu booking belum dimulai, waktu booking dimulai pada {start_time}',
+                message='Booking status tidak valid',
             )
         
-        if time_now > end_time:
-            return CustomResponse.bad_request(
-                message='Waktu booking sudah berakhir',
-            )
+        booking.booking_status = booking_status
+        booking.save()
+        return CustomResponse.ok(
+            message='Booking status berhasil diubah',
+        )
+
+    @action(methods=['POST'], detail=True)
+    def scan(self, request, *args, **kwargs):
+        # user = request.user
+        # now = datetime.datetime.now()
+        # date_now =  now.date()
+        # time_now = now.time()
+        # booking = Booking.objects.filter(
+        #     user=user, 
+        #     booking_date=date_now, 
+        #     booking_status='active').order_by('bookingtime__start_time').first()
+
+        # if not booking:
+        #     return CustomResponse.bad_request(
+        #         message='Booking tidak ditemukan',
+        #     )
+        
+        # bookingtime = booking.bookingtime
+        # start_time = bookingtime.start_time
+        # end_time = bookingtime.end_time
+        
+        # if time_now < start_time:
+        #     return CustomResponse.bad_request(
+        #         message=f'Waktu booking belum dimulai, waktu booking dimulai pada {start_time}',
+        #     )
+        
+        # if time_now > end_time:
+        #     return CustomResponse.bad_request(
+        #         message='Waktu booking sudah berakhir',
+        #     )
+        
+
+        # Fungsi untuk mengirim pesan
+        # def send_fcm_message(token, title, body):
+
         
         return CustomResponse.ok(
             message='Berhasil scan QR Code',

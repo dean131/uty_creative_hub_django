@@ -99,6 +99,7 @@ class Booking(models.Model):
         ("active", "Active"),
         ("completed", "Completed"),
         ("rejected", "Rejected"),
+        ("canceled", "Canceled")
     )
 
     booking_id = models.AutoField(primary_key=True, unique=True, editable=False)

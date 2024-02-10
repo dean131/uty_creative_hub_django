@@ -22,9 +22,7 @@ from account.api.serializers.userprofile_serializers import (
 )
 
 from account.models import OTPCode, User
-from myapp.my_utils.send_email import send_otp
 from myapp.my_utils.custom_response import CustomResponse
-
 from account.tasks import send_otp_celery
 
 
@@ -32,6 +30,8 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filterset_fields = '__all__'
+    ordering_fields = '__all__'
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -39,6 +39,20 @@ class UserViewSet(ModelViewSet):
         if self.action == 'retrieve':
             return UserDetailSerializer
         return super().get_serializer_class()
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.list(
+            message='Successfully retrieved data',
+            data=serializer.data,
+        )
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -521,9 +535,41 @@ class UserViewSet(ModelViewSet):
             message='OTP Code is not Found',
         )
 
+    def change_verification_status(self, request, *args, **kwargs):
+        user = self.get_object()
+        verification_status = request.data.get('verification_status')
 
+        if not verification_status:
+            return CustomResponse.bad_request(
+                message='Verification status is required',
+            )
+        
+        if verification_status not in ['verified', 'rejected', 'suspend']:
+            return CustomResponse.bad_request(
+                message='Verification status is invalid',
+            )
+        
+        user.verification_status = verification_status
+        user.save()
+        return CustomResponse.ok(
+            message='User status has been changed',
+        )
 
+    @action(methods=['POST'], detail=False)
+    def token_fcm(self, request, *args, **kwargs):
+        user = request.user
+        token_fcm = request.data.get('token_fcm')
 
+        if not token_fcm:
+            return CustomResponse.bad_request(
+                message='Token FCM is required',
+            )
+        
+        user.token_fcm = token_fcm
+        user.save()
+        return CustomResponse.ok(
+            message='Token FCM has been changed',
+        )
 
 
 

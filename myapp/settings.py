@@ -16,6 +16,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 from datetime import timedelta
+import firebase_admin
+from firebase_admin import credentials
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -35,8 +37,7 @@ AUTH_USER_MODEL = "account.User"
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'notification.apps.NotificationConfig',
+    # 'daphne',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,10 +49,11 @@ INSTALLED_APPS = [
     'celery',
     'rest_framework',
     'rest_framework_simplejwt',
-    'django_extensions',
+    'django_filters',
 
     'account.apps.AccountConfig',
     'base.apps.BaseConfig',
+    'notification.apps.NotificationConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -61,6 +63,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'EXCEPTION_HANDLER': 'myapp.custom_exception_handler.custom_exception_handler',
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'PAGE_SIZE': 2,
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S',
 }
 
@@ -178,7 +187,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'id-id'
 
 TIME_ZONE = 'Asia/Jakarta'
 
@@ -219,3 +228,17 @@ EMAIL_USE_TLS = True
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_TIMEZONE = "Asia/Jakarta"
+
+# Firebase Cloud Messaging
+# Path ke file service account JSON yang didownload dari Firebase Console
+cred = credentials.Certificate(BASE_DIR / "static/uch-dev-882ab-firebase-adminsdk-872vv-2579255fa4.json")
+firebase_admin.initialize_app(cred)
+
+# MQTT Configurations
+MQTT_SERVER = 'broker.emqx.io'
+MQTT_PORT = 1883
+MQTT_KEEPALIVE = 60
+MQTT_USER = ''
+MQTT_PASSWORD = ''
+
+
