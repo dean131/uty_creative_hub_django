@@ -24,6 +24,7 @@ from account.api.serializers.userprofile_serializers import (
 )
 
 from account.models import OTPCode, User
+from myapp.custom_pagination import CustomPaginationSerializer
 from myapp.my_utils.custom_response import CustomResponse
 from account.tasks import send_otp_celery
 
@@ -34,6 +35,7 @@ class UserViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filterset_fields = '__all__'
     ordering_fields = '__all__'
+    pagination_class = CustomPaginationSerializer
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -42,19 +44,19 @@ class UserViewSet(ModelViewSet):
             return UserDetailSerializer
         return super().get_serializer_class()
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.filter_queryset(self.get_queryset())
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.list(
-            message='Successfully retrieved data',
-            data=serializer.data,
-        )
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return CustomResponse.list(
+    #         message='Successfully retrieved data',
+    #         data=serializer.data,
+    #     )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

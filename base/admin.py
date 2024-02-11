@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     Article,
+    ArticleImage,
     Booking,
     BookingTime,
     Faculty,
@@ -24,6 +25,7 @@ class BookingTimeAdmin(admin.ModelAdmin):
     list_display = ['bookingtime_id', '__str__']
 
 
+admin.site.register(ArticleImage)
 admin.site.register(Faculty)
 admin.site.register(StudyProgram)
 admin.site.register(Room)

@@ -4,6 +4,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.timesince import timesince
 
+
 class Faculty(models.Model):
     faculty_id = models.AutoField(primary_key=True, unique=True, editable=False)
     faculty_name = models.CharField(max_length=255)
@@ -131,7 +132,6 @@ class Article(models.Model):
     article_type = models.CharField(max_length=30)
     article_title = models.CharField(max_length=100)
     article_body = models.TextField()
-    article_image = models.ImageField(upload_to="article_images", null=True, blank=True)
     article_link = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -142,6 +142,46 @@ class Article(models.Model):
     def time_since(self):
         return f"{timesince(self.created_at, depth=1)} yang lalu"
     
+    @property
+    def formated_created_at(self):
+        indo_days = {
+            'Monday': 'Senin',
+            'Tuesday': 'Selasa',
+            'Wednesday': 'Rabu',
+            'Thursday': 'Kamis',
+            'Friday': 'Jumat',
+            'Saturday': 'Sabtu',
+            'Sunday': 'Minggu'
+        }
+        indo_month = {
+            'January': 'Januari',
+            'February': 'Februari',
+            'March': 'Maret',
+            'April': 'April',
+            'May': 'Mei',
+            'June': 'Juni',
+            'July': 'Juli',
+            'August': 'Agustus',
+            'September': 'September',
+            'October': 'Oktober',
+            'November': 'November',
+            'December': 'Desember'
+        }
+        indo_day = indo_days[self.created_at.strftime('%A')]
+        indo_month = indo_month[self.created_at.strftime('%B')]
+        return self.created_at.strftime(f'{indo_day}, %d {indo_month} %Y %H:%M WIB')
+
+
+class ArticleImage(models.Model):
+    articleimage_id = models.AutoField(primary_key=True, unique=True, editable=False)
+    article_image = models.ImageField(upload_to="article_images")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.article.article_title
+
 
 class Committee(models.Model):
     committee_id = models.AutoField(primary_key=True, unique=True, editable=False)

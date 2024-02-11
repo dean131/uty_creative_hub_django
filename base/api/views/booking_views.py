@@ -5,6 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
+from myapp.custom_pagination import CustomPaginationSerializer
 from myapp.my_utils.custom_response import CustomResponse
 from base.models import Booking, BookingMember
 from base.api.serializers.booking_serializers import (
@@ -23,6 +24,7 @@ class BookingModelViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     filterset_fields = '__all__'
     ordering_fields = '__all__'
+    pagination_class = CustomPaginationSerializer
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -30,19 +32,6 @@ class BookingModelViewSet(ModelViewSet):
         if self.action == 'history':
             return BookingHistorySerializer
         return super().get_serializer_class()
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.list(
-            message='Booking list fetched successfully',
-            data=serializer.data
-        )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
