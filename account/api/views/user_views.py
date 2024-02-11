@@ -11,6 +11,8 @@ from rest_framework.decorators import action
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from firebase_admin import messaging, auth
+
 from account.api.serializers.user_serializers import (
     UserSerializer,
     UserRegisterSerializer,
@@ -555,21 +557,6 @@ class UserViewSet(ModelViewSet):
             message='User status has been changed',
         )
 
-    @action(methods=['POST'], detail=False)
-    def token_fcm(self, request, *args, **kwargs):
-        user = request.user
-        token_fcm = request.data.get('token_fcm')
-
-        if not token_fcm:
-            return CustomResponse.bad_request(
-                message='Token FCM is required',
-            )
-        
-        user.token_fcm = token_fcm
-        user.save()
-        return CustomResponse.ok(
-            message='Token FCM has been changed',
-        )
 
 
 

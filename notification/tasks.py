@@ -12,7 +12,8 @@ def send_scheduled_notification(title, body, user_id, booking_id=None):
         notification_type='Booking',
         notification_title=title,
         notification_body=body,
-        user=user
+        notification_topic=user_id,
+        user=user,
     )
 
     if booking_id:

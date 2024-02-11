@@ -1,8 +1,6 @@
 import json
 import datetime
 
-import paho.mqtt.client as mqtt
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -15,17 +13,8 @@ from base.api.serializers.booking_serializers import (
     BookingHistorySerializer,
 )
 
-# MQTT Helper
-def on_connect(mqtt_client, userdata, flags, rc):
-    if rc == 0:
-        print('Connected successfully')
-        mqtt_client.subscribe('django/mqtt')
-    else:
-        print('Bad connection. Code:', rc)
-
-def on_message(mqtt_client, userdata, msg):
-    print(f'Received message on topic: {msg.topic} with payload: {msg.payload}')
-
+from paho.mqtt import publish
+from django.conf import settings
 
 
 class BookingModelViewSet(ModelViewSet):
@@ -223,16 +212,18 @@ class BookingModelViewSet(ModelViewSet):
             message='Booking status berhasil diubah',
         )
 
-    @action(methods=['POST'], detail=True)
+    @action(methods=['POST'], detail=False)
     def scan(self, request, *args, **kwargs):
         # user = request.user
         # now = datetime.datetime.now()
         # date_now =  now.date()
         # time_now = now.time()
+
         # booking = Booking.objects.filter(
         #     user=user, 
         #     booking_date=date_now, 
-        #     booking_status='active').order_by('bookingtime__start_time').first()
+        #     booking_status='active',
+        # ).order_by('bookingtime__start_time').first()
 
         # if not booking:
         #     return CustomResponse.bad_request(
@@ -252,12 +243,21 @@ class BookingModelViewSet(ModelViewSet):
         #     return CustomResponse.bad_request(
         #         message='Waktu booking sudah berakhir',
         #     )
-        
 
-        # Fungsi untuk mengirim pesan
-        # def send_fcm_message(token, title, body):
 
-        
+        # Topik MQTT
+        mqtt_topic = 'uch/pintu'
+        # Pesan yang akan dipublish
+        message = 'True'
+
+        # Melakukan publish pesan
+        publish.single(
+            mqtt_topic, 
+            message, 
+            hostname=settings.MQTT_SERVER, 
+            port=settings.MQTT_PORT,
+        )
+    
         return CustomResponse.ok(
             message='Berhasil scan QR Code',
         )

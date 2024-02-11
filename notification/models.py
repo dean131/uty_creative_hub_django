@@ -1,6 +1,3 @@
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -8,7 +5,7 @@ from django.conf import settings
 
 from account.models import (
     User, 
-    UserProfile
+    UserProfile,
 )
 from base.models import (
     Article,
@@ -38,44 +35,17 @@ class Notification(models.Model):
 
 
 @receiver(post_save, sender=Notification)
-def create_notification(sender, instance, created, **kwargs):
-    topic = instance.notification_topic if instance.notification_topic is not None else None
-    token = instance.user.token_fcm if instance.user.token_fcm is not None else None
-    
-    if topic:
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=instance.notification_title,
-                body=instance.notification_body
-            ),
-            topic=topic
-        )
-    elif token:
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=instance.notification_title,
-                body=instance.notification_body
-            ),
-            token=token
-        )
-    else:
-        return False
+def notification_created(sender, instance, created, **kwargs):
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=instance.notification_title,
+            body=instance.notification_body
+        ),
+        topic=instance.notification_topic 
+    )
     
     response = messaging.send(message)
     print('Successfully sent message:', response)
-
-    ## Send notification to websocket
-    # user_id = instance.user.user_id if instance.user is not None else None
-    # async_to_sync(get_channel_layer().group_send)(
-    #         'notification',
-    #         {
-    #             'type': 'push.notification',
-    #             'notification_type': instance.notification_type,
-    #             'receiver': user_id,
-    #             'title': instance.notification_title,
-    #             'message': instance.notification_body,
-    #         }
-    #     )
 
 @receiver(pre_save, sender=User)
 def user_verification_status(sender, instance, **kwargs):
@@ -111,10 +81,12 @@ def user_verification_status(sender, instance, **kwargs):
         title = "Akun Ditangguhkan"
         message = f"Hai {name}, akun anda telah ditangguhkan."
 
+
     Notification.objects.create(
-        notification_type='User Verification',
+        notification_type='Vefifikasi Akun',
         notification_title=title,
         notification_body=message,
+        notification_topic=instance.user_id,
         user=instance
     )
 
@@ -123,9 +95,10 @@ def userprofile_notification(sender, instance, created, **kwargs):
     if created:
         name = name_formater(instance.user.full_name)
         Notification.objects.create(
-            notification_type='Registration',
-            notification_title="Registration Submitted",
-            notification_body=f"Hi {name}, your registration has been submitted and waiting for approval.",
+            notification_type='Registrasi Akun',
+            notification_title="Registrasi Akun",
+            notification_body=f"Hai {name}, selamat datang di aplikasi kami. Silahkan lengkapi data diri anda.",
+            notification_topic=instance.user.user_id,
             user=instance.user
         )
 
@@ -161,6 +134,7 @@ def booking_status_notification(sender, instance, **kwargs):
                 notification_type='Booking',
                 notification_title='Anda Ditambahkan ke Booking',
                 notification_body=f"Hai {name_formater(bookingmember['user__full_name'])}, anda telah ditambahkan oleh {name} pada {instance.booking_date} di {instance.room.room_name}.",
+                notification_topic=bookingmember['user__user_id'],
                 user=User.objects.filter(user_id=bookingmember['user__user_id']).first()
             )
 
@@ -235,6 +209,7 @@ def booking_status_notification(sender, instance, **kwargs):
         notification_type='Booking',
         notification_title=title,
         notification_body=message,
+        notification_topic=instance.user.user_id,
         user=instance.user
     )
     
@@ -248,6 +223,7 @@ def article_notification(sender, instance, created, **kwargs):
             notification_body=instance.article_body,
             notification_topic='all_users',
         )
+
 
 
 

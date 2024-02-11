@@ -49,8 +49,6 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     verification_status = models.CharField(max_length=10, default='unverified', choices=VERIFICATION_STATUS)
 
-    token_fcm = models.CharField(max_length=255, null=True, blank=True)
-
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'

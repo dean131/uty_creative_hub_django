@@ -30,15 +30,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# CSRF_TRUSTED_ORIGINS = ['']
+CSRF_TRUSTED_ORIGINS = ['https://5499-36-72-214-239.ngrok-free.app']
 
 AUTH_USER_MODEL = "account.User"
 
 # Application definition
 
 INSTALLED_APPS = [
-    # 'daphne',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -223,7 +221,6 @@ EMAIL_HOST_USER = 'ilhamdeanabdillah9c@gmail.com'
 EMAIL_HOST_PASSWORD = 'eoav ksdj ldue jgjw'
 EMAIL_USE_TLS = True
 
-
 # Celery Configurations
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
@@ -235,10 +232,7 @@ cred = credentials.Certificate(BASE_DIR / "static/uch-dev-882ab-firebase-adminsd
 firebase_admin.initialize_app(cred)
 
 # MQTT Configurations
-MQTT_SERVER = 'broker.emqx.io'
+MQTT_SERVER = 'test.mosquitto.org'
 MQTT_PORT = 1883
-MQTT_KEEPALIVE = 60
-MQTT_USER = ''
-MQTT_PASSWORD = ''
 
 

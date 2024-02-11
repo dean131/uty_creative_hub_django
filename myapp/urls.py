@@ -15,12 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path, include
 
 from django.conf import settings
 from django.conf.urls.static import static
 
+def hallo(request):
+    return HttpResponse("<h1 style='display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 68px;'>Hallo, Cuyyy!</h1>")
+
 urlpatterns = [
+    path('', hallo),
     path('admin/', admin.site.urls),
     path('api/', include('base.api.urls')),
     path("api/", include("notification.api.urls")),
