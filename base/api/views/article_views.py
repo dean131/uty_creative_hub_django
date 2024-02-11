@@ -24,3 +24,11 @@ class ArticleModelViewSet(ModelViewSet):
             message='Articles retrieved successfully',
             data=serializer.data,
         )
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return CustomResponse.retrieve(
+            message='Article retrieved successfully',
+            data=serializer.data
+        )

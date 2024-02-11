@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-
+from django.utils.timesince import timesince
 
 class Faculty(models.Model):
     faculty_id = models.AutoField(primary_key=True, unique=True, editable=False)
@@ -126,16 +126,21 @@ class BookingMember(models.Model):
     def __str__(self):
         return self.user.full_name 
 
-
 class Article(models.Model):
     article_id = models.AutoField(primary_key=True, unique=True, editable=False)
-    article_title = models.CharField(max_length=255)
+    article_type = models.CharField(max_length=30)
+    article_title = models.CharField(max_length=100)
     article_body = models.TextField()
     article_image = models.ImageField(upload_to="article_images", null=True, blank=True)
+    article_link = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.article_title
+    
+    @property
+    def time_since(self):
+        return f"{timesince(self.created_at, depth=1)} yang lalu"
     
 
 class Committee(models.Model):

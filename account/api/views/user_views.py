@@ -57,17 +57,12 @@ class UserViewSet(ModelViewSet):
         )
 
     def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return CustomResponse.retrieve(
-                message='Successfully retrieved data',
-                data=serializer.data,
-            )
-        except:
-            return CustomResponse.not_found(
-                message='User not found.'
-            )
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return CustomResponse.retrieve(
+            message='Successfully retrieved data',
+            data=serializer.data,
+        )
         
     @transaction.atomic
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])

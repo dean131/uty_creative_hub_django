@@ -37,17 +37,13 @@ class RoomModelViewSet(ModelViewSet):
         )
     
     def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return CustomResponse.retrieve(
-                message='Room retrieved successfully',
-                data=serializer.data,
-            )
-        except:
-            return CustomResponse.not_found(
-                message='Room not found',
-            )
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return CustomResponse.retrieve(
+            message='Room retrieved successfully',
+            data=serializer.data,
+        )
+
 
         
         

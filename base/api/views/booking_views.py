@@ -45,17 +45,12 @@ class BookingModelViewSet(ModelViewSet):
         )
 
     def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return CustomResponse.retrieve(
-                message='Booking fetched successfully',
-                data=serializer.data
-            )
-        except:
-            return CustomResponse.not_found(
-                message='Booking not found',
-            )
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return CustomResponse.retrieve(
+            message='Booking fetched successfully',
+            data=serializer.data
+        )
 
     # @transaction.atomic
     def create(self, request, *args, **kwargs):
