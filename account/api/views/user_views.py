@@ -534,6 +534,7 @@ class UserViewSet(ModelViewSet):
             message='OTP Code is not Found',
         )
 
+    @action(methods=['POST'], detail=True)
     def change_verification_status(self, request, *args, **kwargs):
         user = self.get_object()
         verification_status = request.data.get('verification_status')
