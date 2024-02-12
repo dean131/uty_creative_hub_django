@@ -2,7 +2,7 @@ from rest_framework import pagination
 from rest_framework.response import Response
 
 class CustomPaginationSerializer(pagination.PageNumberPagination):
-    page_size = 1
+    page_size = 100
     page_size_query_param = 'page_size'
 
     def get_paginated_response(self, data):

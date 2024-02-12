@@ -34,9 +34,6 @@ class RoomImageModelViewSet(ModelViewSet):
         )
     
     def create(self, request, *args, **kwargs):
-        request.data.update({
-            'room': request.data.get('room_id'),
-        })
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
@@ -47,6 +44,13 @@ class RoomImageModelViewSet(ModelViewSet):
                 headers=headers
             )
         return CustomResponse.serializers_erros(serializer.errors)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return CustomResponse.deleted(
+            message='RoomImage deleted successfully'
+        )
         
 
     
