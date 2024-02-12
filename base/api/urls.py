@@ -7,6 +7,7 @@ from .views import (
     bookingtime_views,
     room_views,
     article_views,
+    articleimage_views,
     rating_views,
     bookingmember_views,
     faculty_views,
@@ -20,6 +21,7 @@ router.register('bookingtimes', bookingtime_views.BookingTimeModelViewSet, basen
 router.register('bookings', booking_views.BookingModelViewSet, basename='booking')
 router.register('rooms', room_views.RoomModelViewSet, basename='room')
 router.register('articles', article_views.ArticleModelViewSet, basename='article')
+router.register('articleimages', articleimage_views.ArticleImageModelViewSet, basename='articleimage')
 router.register('ratings', rating_views.RatingModelViewSet, basename='rating')
 router.register('bookingmembers', bookingmember_views.BookingMemberModelViewSet, basename='bookingmember')
 router.register('faculties', faculty_views.FacultyModelViewSet, basename='faculty')
