@@ -66,7 +66,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ],
     'EXCEPTION_HANDLER': 'myapp.custom_exception_handler.custom_exception_handler',
-
+    'DEFAULT_PAGINATION_CLASS': 'myapp.custom_pagination.CustomPaginationSerializer',
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S',
 }
 

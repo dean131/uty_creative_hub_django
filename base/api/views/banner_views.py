@@ -4,14 +4,15 @@ from rest_framework.permissions import IsAuthenticated
 from base.api.serializers.banner_serializers import BannerSerializer
 from base.models import Banner
 from myapp.my_utils.custom_response import CustomResponse
-from myapp.custom_pagination import CustomPaginationSerializer
 
 
 class BannerModelViewSet(ModelViewSet):
     queryset = Banner.objects.all()
     serializer_class = BannerSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = CustomPaginationSerializer
+    filterset_fields = ['banner_id', 'created_at']
+    ordering_fields = ['banner_id', 'created_at']
+
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
