@@ -4,12 +4,14 @@ from rest_framework.permissions import IsAuthenticated
 from base.api.serializers.banner_serializers import BannerSerializer
 from base.models import Banner
 from myapp.my_utils.custom_response import CustomResponse
+from myapp.custom_pagination import CustomPaginationSerializer
 
 
 class BannerModelViewSet(ModelViewSet):
     queryset = Banner.objects.all()
     serializer_class = BannerSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPaginationSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -21,8 +23,27 @@ class BannerModelViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(
-            message='Banner list fetched successfully',
+            message='Banner berhasil diambil',
             data=serializer.data
+        )
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return CustomResponse.created(
+                message='Banner berhasil dibuat',
+                data=serializer.data,
+                headers=headers,
+            )
+        return CustomResponse.serializers_erros(serializer.errors)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return CustomResponse.deleted(
+            message='Banner berhasil dihapus',
         )
 
 
