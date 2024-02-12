@@ -1,0 +1,1 @@
+pip install django djangorestframework Pillow djangorestframework-simplejwt django-filter paho-mqtt celery firebase-admin 
