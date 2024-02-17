@@ -7,6 +7,7 @@ from .models import (
     BookingTime,
     Faculty,
     Room,
+    RoomType,
     RoomFacility,
     StudyProgram,
     RoomImage,
@@ -25,6 +26,7 @@ class BookingTimeAdmin(admin.ModelAdmin):
     list_display = ['bookingtime_id', '__str__']
 
 
+admin.site.register(RoomType)
 admin.site.register(ArticleImage)
 admin.site.register(Faculty)
 admin.site.register(StudyProgram)

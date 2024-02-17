@@ -13,6 +13,7 @@ class RoomImageModelViewSet(ModelViewSet):
     queryset = RoomImage.objects.all()
     serializer_class = RoomImageModelSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = ['roomimage_id', 'room', 'created_at']
 
     def get_serializer_class(self):
         if self.action == 'create':

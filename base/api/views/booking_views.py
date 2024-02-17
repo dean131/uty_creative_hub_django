@@ -127,28 +127,20 @@ class BookingModelViewSet(ModelViewSet):
     
     @action(methods=['POST'], detail=False)
     def validate(self, request, *args, **kwargs):
-        user_status = request.user.verification_status
-        
-        if user_status == 'verified':
-            return CustomResponse.ok(
-                message='User is verified',
-            )
-        if user_status == 'pending':
-            return CustomResponse.bad_request(
-                message='User is not verified yet',
-            )
-        if user_status == 'rejected':
-            return CustomResponse.bad_request(
-                message='User is rejected',
-            )
-        if user_status == 'suspend':
-            return CustomResponse.bad_request(
-                message='User is suspended',
-            )
+        user_status_messages = {
+            'verified': 'User is verified',
+            'rejected': 'User is rejected',
+            'suspend': 'User is suspended',
+            'unverified': 'User is unverified',
+        }
 
-        return CustomResponse.ok(
-            message='User is verified',
-        )
+        user_status = request.user.verification_status
+        message = user_status_messages.get(user_status, 'User status is not recognized')
+
+        if user_status in user_status_messages:
+            return CustomResponse.ok(message=message)
+        else:
+            return CustomResponse.bad_request(message=message)
 
     @action(methods=['GET'], detail=False)
     def history(self, request, *args, **kwargs):

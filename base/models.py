@@ -26,14 +26,10 @@ class StudyProgram(models.Model):
 
 
 class Room(models.Model):
-    ROOM_TYPE = (
-        ("Meeting Room", "Meeting Room"),
-    )
-
     room_id = models.AutoField(primary_key=True, unique=True, editable=False)
     room_name = models.CharField(max_length=100)
     floor = models.IntegerField()
-    room_type = models.CharField(max_length=30, choices=ROOM_TYPE)
+    room_type = models.CharField(max_length=30)
     room_capacity = models.IntegerField()
     room_description = models.TextField(null=True, blank=True)
     room_rating = models.FloatField(default=0.0)
@@ -42,8 +38,18 @@ class Room(models.Model):
     def __str__(self):
         return self.room_name
     
+    @property
     def total_raters(self):
         return self.rating_set.count()
+    
+
+class RoomType(models.Model):
+    roomtype_id = models.AutoField(primary_key=True, unique=True, editable=False)
+    room_type_name = models.CharField(max_length=30)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.room_type_name
     
 
 class RoomImage(models.Model):

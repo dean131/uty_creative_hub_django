@@ -34,7 +34,7 @@ class RoomModelViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(
-            message='Rooms retrieved successfully',
+            message='Rooms berhasil diambil',
             data=serializer.data,
         )
     
@@ -42,7 +42,7 @@ class RoomModelViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.retrieve(
-            message='Room retrieved successfully',
+            message='Room berhasil diambil',
             data=serializer.data,
         )
     
@@ -52,7 +52,7 @@ class RoomModelViewSet(ModelViewSet):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return CustomResponse.created(
-                message='Room created successfully',
+                message='Room berhasil dibuat',
                 data=serializer.data,
                 headers=headers
             )
@@ -70,7 +70,7 @@ class RoomModelViewSet(ModelViewSet):
                 instance._prefetched_objects_cache = {}
 
             return CustomResponse.updated(
-                message='Room updated successfully',
+                message='Room berhasil diupdate',
                 data=serializer.data,
             )
         return CustomResponse.serializers_erros(serializer.errors)
@@ -79,7 +79,7 @@ class RoomModelViewSet(ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return CustomResponse.deleted(
-            message='Room deleted successfully'
+            message='Room berhasil dihapus',
         )
 
 

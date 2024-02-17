@@ -31,6 +31,7 @@ class RoomListModelSerializer(serializers.ModelSerializer):
             "room_rating",
             "total_raters",
             "created_at",
+            "room_description",
             "roomimages",
         ]
 

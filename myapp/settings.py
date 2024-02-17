@@ -30,7 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['https://5499-36-72-214-239.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://b855-103-69-233-244.ngrok-free.app']
 
 AUTH_USER_MODEL = "account.User"
 
@@ -139,17 +139,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'myapp.wsgi.application'
-
-ASGI_APPLICATION = "myapp.asgi.application"
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
-    },
-}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
