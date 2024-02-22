@@ -22,11 +22,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 def test(request):
-    return HttpResponse("Hello, World!")
+    return HttpResponse("Hello, world. You're at the polls index.")
 
 urlpatterns = [
-    path('', admin.site.urls),
-    path('test/', test),
+    path('', test),
+    path('admin/', admin.site.urls),
     path('api/', include('base.api.urls')),
     path("api/", include("notification.api.urls")),
     path("api/account/", include("account.api.urls")),
