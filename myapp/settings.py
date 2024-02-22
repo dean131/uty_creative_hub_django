@@ -37,7 +37,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1:1337', 
     'http://localhost:1337', 
     'https://localhost:1337',
-    'https://uch.faiznazhir.com'
+    'https://uch.faiznazhir.com',
 ]
 
 AUTH_USER_MODEL = "account.User"
