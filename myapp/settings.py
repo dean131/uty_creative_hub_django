@@ -32,7 +32,13 @@ DEBUG = os.environ.get('DEBUG', True)
 ALLOWED_HOSTS = ['*']
 
 # CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:1337').split(' ')
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:1337', 'https://127.0.0.1:1337', 'http://localhost:1337', 'https://localhost:1337']
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:1337', 
+    'https://127.0.0.1:1337', 
+    'http://localhost:1337', 
+    'https://localhost:1337',
+    'https://uch.faiznazhir.com'
+]
 
 AUTH_USER_MODEL = "account.User"
 
