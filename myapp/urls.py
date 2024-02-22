@@ -22,7 +22,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 def test(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    return HttpResponse("WASSUP BANGGGG")
 
 urlpatterns = [
     path('', test),

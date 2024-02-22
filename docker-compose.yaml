@@ -6,60 +6,65 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    image: deanabdillah/uch_backend:latest
-    command: sh -c "python3 manage.py makemigrations && python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && gunicorn --config gunicorn_config.py myapp.wsgi:application"
+    image: uch_backend
+    command: sh -c "python3 manage.py makemigrations && 
+                    python3 manage.py migrate --noinput && 
+                    python3 manage.py collectstatic --noinput && 
+                    gunicorn --config gunicorn_config.py myapp.wsgi:application"
     volumes:
-      - ".:/app"
-    expose:
-      - 8000
+      - "static_volume:/app/staticfiles"
+      - "media_volume:/app/mediafiles"
     env_file:
       - .env.dev
     depends_on:
-      - db_uch
-      - redis_uch
+      - uch_db
+      - uch_redis
 
-  db_uch:
-    container_name: db_uch
+  uch_db:
+    container_name: uch_db
     image: postgres:15-alpine
     volumes:
       - "db_volume:/var/lib/postgresql/data/"
     env_file:
       - .env.dev
 
-  redis_uch:
-    container_name: redis_uch
+  uch_redis:
+    container_name: uch_redis
     image: redis:7-alpine 
 
-  celery_worker:
-    container_name: celery_worker
+  uch_celery_worker:
+    container_name: uch_celery_worker
     build:
       context: .
       dockerfile: Dockerfile
-    image: celery_worker
-    command: celery -A myapp worker -l info
+    image: uch_celery_worker
+    command: sh -c "celery -A myapp worker -l info"
     volumes:
       - ".:/app"
     env_file:
       - .env.dev
     depends_on:
-      - db_uch
-      - redis_uch
+      - uch_db
+      - uch_redis
 
-  nginx_uch:
-    container_name: nginx_uch
+  uch_nginx:
+    container_name: uch_nginx
     build: 
       context: ./nginx
       dockerfile: Dockerfile
-    image: nginx_uch
+    image: uch_nginx
     ports:
       - 1337:80
     volumes:
-      - "static_volume:/app/static"
+      - "static_volume:/app/staticfiles"
+      - "media_volume:/app/mediafiles"
     depends_on:
       - uch_backend
 
 volumes:
   static_volume:
     name: static_volume
+  media_volume:
+    name: media_volume
   db_volume:
     name: db_volume

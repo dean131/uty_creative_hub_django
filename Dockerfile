@@ -1,9 +1,11 @@
 # pull official base image
 FROM python:3.11.4-alpine
 
+ARG APP_HOME=/app
+ARG APP_PORT=8000
+
 # set work directory
-WORKDIR /app
-RUN mkdir static
+WORKDIR $APP_HOME
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -14,5 +16,10 @@ ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
+RUN mkdir staticfiles
+RUN mkdir mediafiles
+
 # copy project
 COPY . .
+
+EXPOSE $APP_PORT

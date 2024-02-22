@@ -199,10 +199,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "static/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 
 
 # Default primary key field type
@@ -225,7 +225,7 @@ CELERY_TIMEZONE = os.environ.get('CELERY_TIMEZONE', 'Asia/Jakarta')
 
 # Firebase Cloud Messaging
 # Path ke file service account JSON yang didownload dari Firebase Console
-cred = credentials.Certificate(BASE_DIR / "static/uch-dev-882ab-firebase-adminsdk-872vv-2579255fa4.json")
+cred = credentials.Certificate(BASE_DIR / "uch-dev-882ab-firebase-adminsdk-872vv-2579255fa4.json")
 firebase_admin.initialize_app(cred)
 
 # MQTT Configurations
