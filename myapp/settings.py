@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,14 +23,16 @@ from firebase_admin import credentials
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_!8x70&!u12i++d4&o0n9okdcb)cr9&f*-q&b5=6ze-tp7in!&'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-#_@z!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', True)
 
+# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(' ')
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['https://b855-103-69-233-244.ngrok-free.app']
+# CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:1337').split(' ')
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:1337', 'https://127.0.0.1:1337', 'http://localhost:1337', 'https://localhost:1337']
 
 AUTH_USER_MODEL = "account.User"
 
@@ -144,11 +146,22 @@ WSGI_APPLICATION = 'myapp.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_DB"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -186,15 +199,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
+STATIC_ROOT = BASE_DIR / 'static/'
 
-# STATIC_ROOT = BASE_DIR / 'static'
-MEDIA_ROOT = BASE_DIR / 'static/media'
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "static/media/"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    # "/var/www/static/",
-]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -202,17 +211,17 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # SMTP Configurations
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'ilhamdeanabdillah9c@gmail.com'
-EMAIL_HOST_PASSWORD = 'eoav ksdj ldue jgjw'
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
 
 # Celery Configurations
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_TIMEZONE = "Asia/Jakarta"
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://127.0.0.1:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://127.0.0.1:6379/0')
+CELERY_TIMEZONE = os.environ.get('CELERY_TIMEZONE', 'Asia/Jakarta')
 
 # Firebase Cloud Messaging
 # Path ke file service account JSON yang didownload dari Firebase Console
@@ -220,7 +229,8 @@ cred = credentials.Certificate(BASE_DIR / "static/uch-dev-882ab-firebase-adminsd
 firebase_admin.initialize_app(cred)
 
 # MQTT Configurations
-MQTT_SERVER = 'test.mosquitto.org'
-MQTT_PORT = 1883
+MQTT_SERVER = os.environ.get('MQTT_SERVER', 'localhost')
+MQTT_PORT = os.environ.get('MQTT_PORT', 1883)
+MQTT_TOPIC = os.environ.get('MQTT_TOPIC', 'uch/pintu')
 
 

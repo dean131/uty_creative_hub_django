@@ -21,16 +21,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-def hallo(request):
-    return HttpResponse("<h1 style='display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 68px;'>Hallo, Cuyyy!</h1>")
-
 urlpatterns = [
-    path('', hallo),
-    path('admin/', admin.site.urls),
+    path('', admin.site.urls),
     path('api/', include('base.api.urls')),
     path("api/", include("notification.api.urls")),
     path("api/account/", include("account.api.urls")),
 ]
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# if settings.DEBUG:
+#     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

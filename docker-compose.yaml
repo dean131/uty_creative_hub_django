@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  uch_backend:
+    container_name: uch_backend
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: deanabdillah/uch_backend:latest
+    command: sh -c "python3 manage.py makemigrations && python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && gunicorn --config gunicorn_config.py myapp.wsgi:application"
+    volumes:
+      - "static_volume:/app"
+    expose:
+      - 8000
+    env_file:
+      - .env.dev
+    depends_on:
+      - db_uch
+      - redis_uch
+
+  db_uch:
+    container_name: db_uch
+    image: postgres:15-alpine
+    volumes:
+      - "db_volume:/var/lib/postgresql/data/"
+    env_file:
+      - .env.dev
+
+  redis_uch:
+    container_name: redis_uch
+    image: redis:7-alpine 
+
+  celery_worker:
+    container_name: celery_worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: celery_worker
+    command: celery -A myapp worker -l info
+    volumes:
+      - "static_volume:/app"
+    env_file:
+      - .env.dev
+    depends_on:
+      - db_uch
+      - redis_uch
+
+  nginx_uch:
+    container_name: nginx_uch
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: nginx_uch
+    ports:
+      - 1337:80
+    volumes:
+      - "static_volume:/app/static"
+    depends_on:
+      - uch_backend
+
+volumes:
+  static_volume:
+    name: static_volume
+  db_volume:
+    name: db_volume

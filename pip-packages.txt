@@ -1,1 +1,1 @@
-pip install django djangorestframework Pillow djangorestframework-simplejwt django-filter paho-mqtt celery[redis] firebase-admin 
+pip install django==4.2.7 djangorestframework Pillow djangorestframework-simplejwt django-filter paho-mqtt celery[redis] firebase-admin pip install psycopg[binary] gunicorn

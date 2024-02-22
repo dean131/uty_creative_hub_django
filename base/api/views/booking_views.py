@@ -190,39 +190,39 @@ class BookingModelViewSet(ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def scan(self, request, *args, **kwargs):
-        # user = request.user
-        # now = datetime.datetime.now()
-        # date_now =  now.date()
-        # time_now = now.time()
+        user = request.user
+        now = datetime.datetime.now()
+        date_now =  now.date()
+        time_now = now.time()
 
-        # booking = Booking.objects.filter(
-        #     user=user, 
-        #     booking_date=date_now, 
-        #     booking_status='active',
-        # ).order_by('bookingtime__start_time').first()
+        booking = Booking.objects.filter(
+            user=user, 
+            booking_date=date_now, 
+            booking_status='active',
+        ).order_by('bookingtime__start_time').first()
 
-        # if not booking:
-        #     return CustomResponse.bad_request(
-        #         message='Booking tidak ditemukan',
-        #     )
+        if not booking:
+            return CustomResponse.bad_request(
+                message='Booking tidak ditemukan',
+            )
         
-        # bookingtime = booking.bookingtime
-        # start_time = bookingtime.start_time
-        # end_time = bookingtime.end_time
+        bookingtime = booking.bookingtime
+        start_time = bookingtime.start_time
+        end_time = bookingtime.end_time
         
-        # if time_now < start_time:
-        #     return CustomResponse.bad_request(
-        #         message=f'Waktu booking belum dimulai, waktu booking dimulai pada {start_time}',
-        #     )
+        if time_now < start_time:
+            return CustomResponse.bad_request(
+                message=f'Waktu booking belum dimulai, waktu booking dimulai pada {start_time}',
+            )
         
-        # if time_now > end_time:
-        #     return CustomResponse.bad_request(
-        #         message='Waktu booking sudah berakhir',
-        #     )
+        if time_now > end_time:
+            return CustomResponse.bad_request(
+                message='Waktu booking sudah berakhir',
+            )
 
 
         # Topik MQTT
-        mqtt_topic = 'uch/pintu'
+        mqtt_topic = settings.MQTT_TOPIC
         # Pesan yang akan dipublish
         message = 'True'
 
