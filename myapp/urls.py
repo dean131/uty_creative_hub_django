@@ -21,8 +21,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+def test(request):
+    return HttpResponse("Hello, World!")
+
 urlpatterns = [
     path('', admin.site.urls),
+    path('test/', test),
     path('api/', include('base.api.urls')),
     path("api/", include("notification.api.urls")),
     path("api/account/", include("account.api.urls")),
