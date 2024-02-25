@@ -128,14 +128,14 @@ class BookingModelViewSet(ModelViewSet):
     @action(methods=['POST'], detail=False)
     def validate(self, request, *args, **kwargs):
         user_status_messages = {
-            'verified': 'User is verified',
-            'rejected': 'User is rejected',
-            'suspend': 'User is suspended',
-            'unverified': 'User is unverified',
+            'verified': 'Status akun sudah terverifikasi',
+            'rejected': 'Status akun ditolak',
+            'suspend': 'Status akun ditangguhkan',
+            'unverified': 'Status akun belum terverifikasi',
         }
 
         user_status = request.user.verification_status
-        message = user_status_messages.get(user_status, 'User status is not recognized')
+        message = user_status_messages.get(user_status, 'Status akun tidak valid')
 
         if user_status in user_status_messages:
             return CustomResponse.ok(message=message)
