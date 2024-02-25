@@ -177,7 +177,16 @@ class BookingModelViewSet(ModelViewSet):
                 message='Booking status diperlukan',
             )
         
-        if booking_status not in ['initiated', 'pending', 'active', 'rejected', 'cancelled', 'completed']:
+        booking_status_list = [
+            'initiated', 
+            'pending', 
+            'active', 
+            'rejected', 
+            'canceled', 
+            'completed'
+        ]
+        
+        if booking_status not in booking_status_list:
             return CustomResponse.bad_request(
                 message='Booking status tidak valid',
             )

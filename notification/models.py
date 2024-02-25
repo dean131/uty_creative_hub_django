@@ -201,7 +201,7 @@ def booking_status_notification(sender, instance, **kwargs):
         title = "Booking Selesai"
         message = f"Hai {name}, booking anda telah selesai."
 
-    elif instance.booking_status == "cancelled":
+    elif instance.booking_status == "canceled":
         title = "Booking Dibatalkan"
         message = f"Hai {name}, booking anda telah dibatalkan."
         
