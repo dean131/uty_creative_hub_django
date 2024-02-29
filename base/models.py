@@ -229,6 +229,9 @@ def update_room_rating(sender, instance, created, **kwargs):
 
         room.room_rating = total_rating / total_raters
         room.total_raters = total_raters
+
+        instance.booking.is_rated = True
+        instance.booking.save()
         room.save()
 
 @receiver(pre_delete, sender=Rating)
@@ -240,11 +243,12 @@ def update_room_rating_delete(sender, instance, **kwargs):
     total_rating -= instance.rating_value
     total_raters -= 1
 
-    if total_raters == 0:
+    if total_raters <= 0:
         room.room_rating = 0
+        room.total_raters = 0
     else:
         room.room_rating = total_rating / total_raters
-    room.total_raters = total_raters
+        room.total_raters = total_raters
     room.save()
 
     
