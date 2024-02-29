@@ -128,8 +128,6 @@ class Rating(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE, null=True, blank=True)
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    # room = models.ForeignKey(Room, on_delete=models.CASCADE)
     
     def __str__(self):
         return str(self.rating_id)
