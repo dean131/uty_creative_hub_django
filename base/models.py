@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils.timesince import timesince
 
@@ -32,15 +32,14 @@ class Room(models.Model):
     room_type = models.CharField(max_length=30)
     room_capacity = models.IntegerField()
     room_description = models.TextField(null=True, blank=True)
-    room_rating = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Rating
+    room_rating = models.FloatField(default=0.0)
+    total_raters = models.IntegerField(default=0)
 
     def __str__(self):
         return self.room_name
-    
-    @property
-    def total_raters(self):
-        return self.rating_set.count()
     
 
 class RoomType(models.Model):
@@ -73,19 +72,6 @@ class RoomFacility(models.Model):
 
     def __str__(self):
         return self.facility_name
-    
-
-class Rating(models.Model):
-    rating_id = models.AutoField(primary_key=True, unique=True, editable=False)
-    rating_value = models.FloatField()
-    comment = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return self.room.room_name
 
 
 class BookingTime(models.Model):
@@ -113,6 +99,7 @@ class Booking(models.Model):
     booking_date = models.DateField()
     booking_status = models.CharField(max_length=30, default="pending", choices=BOOKING_STATUS)
     booking_needs = models.TextField(null=True, blank=True)
+    is_rated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
     bookingtime = models.ForeignKey(BookingTime, on_delete=models.CASCADE, null=True, blank=True)
@@ -132,6 +119,21 @@ class BookingMember(models.Model):
 
     def __str__(self):
         return self.user.full_name 
+    
+
+class Rating(models.Model):
+    rating_id = models.AutoField(primary_key=True, unique=True, editable=False)
+    rating_value = models.FloatField()
+    comment = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.rating_id)
+
 
 class Article(models.Model):
     article_id = models.AutoField(primary_key=True, unique=True, editable=False)
@@ -218,24 +220,31 @@ def create_bookingmember(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Rating)
 def update_room_rating(sender, instance, created, **kwargs):
     if created:
-        room = instance.room
-        ratings = Rating.objects.filter(room=room)
-        total_rating = 0.0
-        for rating in ratings:
-            total_rating += rating.rating_value
-        room.room_rating = total_rating / ratings.count()
+        room = instance.booking.room
+        total_raters = room.total_raters
+        total_rating = room.room_rating * total_raters
+
+        total_rating += instance.rating_value
+        total_raters += 1
+
+        room.room_rating = total_rating / total_raters
+        room.total_raters = total_raters
         room.save()
 
-@receiver(post_delete, sender=Rating)
+@receiver(pre_delete, sender=Rating)
 def update_room_rating_delete(sender, instance, **kwargs):
-    room = instance.room
-    ratings = room.rating_set.filter()
-    if not ratings:
-        room.room_rating = 0.0
-        room.save()
+    room = instance.booking.room
+    total_raters = room.total_raters
+    total_rating = room.room_rating * total_raters
+
+    total_rating -= instance.rating_value
+    total_raters -= 1
+
+    if total_raters == 0:
+        room.room_rating = 0
     else:
-        total_rating = 0.0
-        for rating in ratings:
-            total_rating += rating.rating_value
-        room.room_rating = total_rating / ratings.count()
-        room.save()
+        room.room_rating = total_rating / total_raters
+    room.total_raters = total_raters
+    room.save()
+
+    

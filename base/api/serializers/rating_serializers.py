@@ -16,5 +16,4 @@ class RatingDetailModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_user(self, obj):
-        user = obj.user
-        return user.full_name
+        return obj.booking.user.full_name

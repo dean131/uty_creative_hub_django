@@ -48,13 +48,7 @@ class UserProfileViewSet(ModelViewSet):
         user.save()
         
         request.user = user
-        faculty_id = request.data.get('faculty_id')
-        studyprogram_id = request.data.get('studyprogram_id')
-        request.data.update({
-            'user': user.user_id,
-            'faculty': faculty_id,
-            'studyprogram': studyprogram_id,
-        })
+        request.data['user'] = user.user_id
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)

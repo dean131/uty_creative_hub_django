@@ -22,7 +22,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 def test(request):
-    return HttpResponse("<h1>WASSUPPPP!</h1>")
+    return HttpResponse("<h1>WASSUPPPP CUYYYY!</h1>")
 
 urlpatterns = [
     path('', test),

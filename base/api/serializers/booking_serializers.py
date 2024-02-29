@@ -6,7 +6,7 @@ from account.api.serializers.user_serializers import (
 )
 
 from base.api.serializers.room_serializers import (
-    RoomDetailBookingModelSerializer,
+    RoomDetailBookingSerializer,
     RoomBookingHistoryModelSerializer
 )
 from base.api.serializers.bookingtime_serializers import BookingTimeModelSerializer
@@ -44,7 +44,7 @@ class BookingHistorySerializer(serializers.ModelSerializer):
 
 class BookingDetailModelSerializer(serializers.ModelSerializer):
     user = UserBookingDetailSerializer()
-    room = RoomDetailBookingModelSerializer()
+    room = RoomDetailBookingSerializer()
     bookingtime = BookingTimeModelSerializer()
     bookingmember = serializers.SerializerMethodField()
     booking_day = serializers.SerializerMethodField()
@@ -59,6 +59,7 @@ class BookingDetailModelSerializer(serializers.ModelSerializer):
             'booking_needs',
             'created_at',
             'bookingtime',
+            'is_rated',
             'user',
             'room',
             'bookingmember',

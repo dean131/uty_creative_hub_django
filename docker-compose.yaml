@@ -7,9 +7,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: uch_backend
-    command: sh -c "python3 manage.py makemigrations && 
-                    python3 manage.py migrate --noinput && 
-                    python3 manage.py collectstatic --noinput && 
+    command: sh -c "python3 manage.py makemigrations account base notification && 
+                    python3 manage.py migrate --no-input && 
+                    python3 manage.py collectstatic --no-input && 
                     gunicorn --config gunicorn_config.py myapp.wsgi:application"
     volumes:
       - ".:/app"

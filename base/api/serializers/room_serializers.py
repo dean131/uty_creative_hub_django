@@ -62,7 +62,7 @@ class RoomDetailModelSerializer(serializers.ModelSerializer):
         ]
 
     def get_ratings(self, obj):
-        ratings = obj.rating_set.all()
+        ratings = Rating.objects.filter(booking__room=obj)
         return RatingDetailModelSerializer(ratings, many=True).data
     
     def get_facilities(self, obj):
@@ -74,23 +74,16 @@ class RoomDetailModelSerializer(serializers.ModelSerializer):
         return RoomImageModelSerializer(roomimages, many=True, context=self.context).data
     
 
-class RoomDetailBookingModelSerializer(serializers.ModelSerializer):
+class RoomDetailBookingSerializer(serializers.ModelSerializer):
     room_images = serializers.SerializerMethodField()
-    is_rated = serializers.SerializerMethodField()
     class Meta:
         model = Room
-        fields = ['room_id', 'room_name', 'is_rated', 'room_capacity', 'room_images']
+        fields = ['room_id', 'room_name', 'room_rating', 'room_capacity', 'room_images']
 
     def get_room_images(self, obj):
         room_image = obj.roomimage_set.all()
         return RoomImageModelSerializer(room_image, many=True, context=self.context).data
-    
-    def get_is_rated(self, obj):
-        user = self.context.get('request').user
-        rating = Rating.objects.filter(user=user, room=obj)
-        if rating.exists():
-            return True
-        return False
+
 
 
 

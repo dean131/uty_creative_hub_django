@@ -11,8 +11,6 @@ from rest_framework.decorators import action
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from firebase_admin import messaging, auth
-
 from account.api.serializers.user_serializers import (
     UserSerializer,
     UserRegisterSerializer,
@@ -66,7 +64,7 @@ class UserViewSet(ModelViewSet):
             data=serializer.data,
         )
         
-    @transaction.atomic
+    # @transaction.atomic
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
     def register(self, request, *args, **kwargs):
         email_dest = request.data.get('email')
@@ -117,7 +115,7 @@ class UserViewSet(ModelViewSet):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-            send_otp_celery(email_dest, otp_code)
+            send_otp_celery.delay(email_dest, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -129,7 +127,7 @@ class UserViewSet(ModelViewSet):
                 code=otp_code,
                 user=user,
             )
-            send_otp_celery(email_dest, otp_code)
+            send_otp_celery.delay(email_dest, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -364,7 +362,7 @@ class UserViewSet(ModelViewSet):
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
-            send_otp_celery(email, otp_code)
+            send_otp_celery.delay(email, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
             )
@@ -400,7 +398,7 @@ class UserViewSet(ModelViewSet):
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp_celery(email, otp_code, user.full_name)
+            send_otp_celery.delay(email, otp_code, user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
@@ -433,7 +431,7 @@ class UserViewSet(ModelViewSet):
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp_celery(email, otp_code, user.full_name)
+            send_otp_celery.delay(email, otp_code, user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
@@ -524,7 +522,7 @@ class UserViewSet(ModelViewSet):
             otp_obj.code = otp_code
             otp_obj.save()
 
-            send_otp_celery(email, otp_code, otp_obj.user.full_name)
+            send_otp_celery.delay(email, otp_code, otp_obj.user.full_name)
 
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',

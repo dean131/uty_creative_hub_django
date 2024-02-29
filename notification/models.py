@@ -24,8 +24,8 @@ class Notification(models.Model):
     notification_id = models.AutoField(primary_key=True, unique=True, editable=False)
     notification_title = models.CharField(max_length=255)
     notification_body = models.TextField()
-    notification_type = models.CharField(max_length=20)
-    notification_topic = models.CharField(max_length=25, null=True, blank=True)
+    notification_type = models.CharField(max_length=50)
+    notification_topic = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None, null=True, blank=True)
@@ -81,6 +81,9 @@ def user_verification_status(sender, instance, **kwargs):
         title = "Akun Ditangguhkan"
         message = f"Hai {name}, akun anda telah ditangguhkan."
 
+    else:
+        title = "Status Akun Tidak Diketahui"
+        message = f"Hai {name}, status akun anda tidak diketahui."
 
     Notification.objects.create(
         notification_type='Vefifikasi Akun',
@@ -212,6 +215,7 @@ def booking_status_notification(sender, instance, **kwargs):
         notification_topic=instance.user.user_id,
         user=instance.user
     )
+    
     
 
 @receiver(post_save, sender=Article)
