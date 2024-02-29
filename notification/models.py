@@ -37,11 +37,14 @@ class Notification(models.Model):
 @receiver(post_save, sender=Notification)
 def notification_created(sender, instance, created, **kwargs):
     message = messaging.Message(
-        notification=messaging.Notification(
-            title=instance.notification_title,
-            body=instance.notification_body
-        ),
-        topic=instance.notification_topic 
+        data={
+            'title': instance.notification_title,
+            'body': instance.notification_body,
+        },
+        topic=instance.notification_topic,
+        android=messaging.AndroidConfig(
+            priority='high',
+        )
     )
     
     response = messaging.send(message)
