@@ -12,6 +12,7 @@ services:
                     python3 manage.py collectstatic --noinput && 
                     gunicorn --config gunicorn_config.py myapp.wsgi:application"
     volumes:
+      - ".:/app"
       - "static_volume:/app/staticfiles"
       - "media_volume:/app/mediafiles"
     env_file:
