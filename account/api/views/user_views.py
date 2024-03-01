@@ -41,20 +41,6 @@ class UserViewSet(ModelViewSet):
         if self.action == 'retrieve':
             return UserDetailSerializer
         return super().get_serializer_class()
-    
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.filter_queryset(self.get_queryset())
-
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         return self.get_paginated_response(serializer.data)
-
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return CustomResponse.list(
-    #         message='Successfully retrieved data',
-    #         data=serializer.data,
-    #     )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -111,10 +97,12 @@ class UserViewSet(ModelViewSet):
             )
         # END EMAIL VALIDATOR
 
-        otp_obj = OTPCode.objects.filter(user__email=email_dest, user__is_active=False).first()
+        otp_obj = OTPCode.objects.update_or_create(user__email=email_dest, user__is_active=False).first()
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
+            otp_obj.user.set_password(password)
+            otp_obj.user.save()
             send_otp_celery.delay(email_dest, otp_code)
             return CustomResponse.ok(
                 message='OTP Code has been sent to your email',
