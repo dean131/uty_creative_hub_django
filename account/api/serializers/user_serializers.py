@@ -40,7 +40,7 @@ class UserDetailSerializer(UserSerializer):
 
     def get_userprofile(self, obj):
         try:
-            return UserProfileSerializer(obj.userprofile, context=self.context).data
+            return UserProfileUserDetailSerializer(obj.userprofile, context=self.context).data
         except:
             pass
         return None

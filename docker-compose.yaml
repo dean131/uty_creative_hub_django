@@ -12,9 +12,9 @@ services:
                     python3 manage.py collectstatic --no-input && 
                     gunicorn --config gunicorn_config.py myapp.wsgi:application"
     volumes:
-      - ".:/app"
-      - "static_volume:/app/staticfiles"
-      - "media_volume:/app/mediafiles"
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
     env_file:
       - .env.dev
     depends_on:
@@ -25,7 +25,7 @@ services:
     container_name: uch_db
     image: postgres:15-alpine
     volumes:
-      - "db_volume:/var/lib/postgresql/data/"
+      - db_volume:/var/lib/postgresql/data/
     env_file:
       - .env.dev
 
@@ -41,7 +41,7 @@ services:
     image: uch_celery_worker
     command: sh -c "celery -A myapp worker -l info"
     volumes:
-      - ".:/app"
+      - .:/app
     env_file:
       - .env.dev
     depends_on:
@@ -57,8 +57,8 @@ services:
     ports:
       - 1337:80
     volumes:
-      - "static_volume:/app/staticfiles"
-      - "media_volume:/app/mediafiles"
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
     depends_on:
       - uch_backend
 
