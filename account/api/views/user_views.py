@@ -11,6 +11,8 @@ from rest_framework.decorators import action
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from account.tasks import send_otp_celery
+from account.models import OTPCode, User
 from account.api.serializers.user_serializers import (
     UserSerializer,
     UserRegisterSerializer,
@@ -21,10 +23,8 @@ from account.api.serializers.userprofile_serializers import (
     UserProfileSerializer,
 )
 
-from account.models import OTPCode, User
 from myapp.custom_pagination import CustomPaginationSerializer
 from myapp.my_utils.custom_response import CustomResponse
-from account.tasks import send_otp_celery
 
 
 class UserViewSet(ModelViewSet):
