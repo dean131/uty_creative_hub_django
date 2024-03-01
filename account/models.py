@@ -45,9 +45,10 @@ class User(AbstractBaseUser):
     full_name = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
 
+    verification_status = models.CharField(max_length=10, default='unverified', choices=VERIFICATION_STATUS)
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-    verification_status = models.CharField(max_length=10, default='unverified', choices=VERIFICATION_STATUS)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     objects = CustomUserManager()
 
