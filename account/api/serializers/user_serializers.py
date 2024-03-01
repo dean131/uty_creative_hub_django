@@ -39,8 +39,10 @@ class UserDetailSerializer(UserSerializer):
         ]
 
     def get_userprofile(self, obj):
-        if obj.userprofile:
-            return UserProfileUserDetailSerializer(obj.userprofile, context=self.context).data
+        try:
+            return UserProfileSerializer(obj.userprofile, context=self.context).data
+        except:
+            pass
         return None
     
     def get_first_name(self, obj):
@@ -52,8 +54,10 @@ class UserListSerializer(UserSerializer):
     first_name = serializers.SerializerMethodField()
 
     def get_userprofile(self, obj):
-        if obj.userprofile:
+        try:
             return UserProfileSerializer(obj.userprofile, context=self.context).data
+        except:
+            pass
         return None
     
     def get_first_name(self, obj):
