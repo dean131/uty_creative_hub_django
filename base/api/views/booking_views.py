@@ -98,7 +98,7 @@ class BookingModelViewSet(ModelViewSet):
             bookingtime_id__in=bookingtime_id_list
         )
 
-        if bookings.exists():
+        if bookings:
             return CustomResponse.bad_request(
                 message='Booking tidak tersedia',
             )
