@@ -158,14 +158,12 @@ def booking_status_notification(sender, instance, **kwargs):
 
         combined_start_time = datetime.datetime.combine(date, start_time)
         combined_end_time = datetime.datetime.combine(date, end_time)
-        # print(combined) 
 
         # print(f'Datetime: {datetime.datetime.now()}')
         # print(f'Timezone: {timezone.datetime.now()}')
         
         converted_start_datetime = timezone.make_aware(combined_start_time, timezone.get_current_timezone())
         converted_end_datetime = timezone.make_aware(combined_end_time, timezone.get_current_timezone())
-        # print(f'Converted: {converted_datetime}')
 
         notification_dict = [
             {
