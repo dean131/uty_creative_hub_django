@@ -148,43 +148,53 @@ def booking_status_notification(sender, instance, **kwargs):
         # print(type(instance.bookingtime.end_time))
             
         date = instance.booking_date
-        time = instance.bookingtime.end_time
+        start_time = instance.bookingtime.start_time
+        end_time = instance.bookingtime.end_time
         # print(type(datetime.datetime.strptime(date, '%Y-%m-%d').date()))
         # print(type(datetime.datetime.strptime(time, '%H:%M:%S').time()))
 
         # date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
         # time = datetime.datetime.strptime(time, '%H:%M:%S').time()
 
-        combined = datetime.datetime.combine(date, time)
+        combined_start_time = datetime.datetime.combine(date, start_time)
+        combined_end_time = datetime.datetime.combine(date, end_time)
         # print(combined) 
 
         # print(f'Datetime: {datetime.datetime.now()}')
         # print(f'Timezone: {timezone.datetime.now()}')
         
-        converted_datetime = timezone.make_aware(combined, timezone.get_current_timezone())
+        converted_start_datetime = timezone.make_aware(combined_start_time, timezone.get_current_timezone())
+        converted_end_datetime = timezone.make_aware(combined_end_time, timezone.get_current_timezone())
         # print(f'Converted: {converted_datetime}')
 
         notification_dict = [
             {
                 'title': 'Pengingat Booking',
+                'message': f'Hai {name}, booking anda akan dimulai dalam 10 menit',
+                'user_id': instance.user.user_id,
+                'booking_id': None,
+                'eta': converted_start_datetime - datetime.timedelta(minutes=10)
+            },
+            {
+                'title': 'Pengingat Booking',
                 'message': f'Hai {name}, booking anda akan berakhir dalam 10 menit',
                 'user_id': instance.user.user_id,
                 'booking_id': None,
-                'eta': converted_datetime - datetime.timedelta(minutes=10)
+                'eta': converted_end_datetime - datetime.timedelta(minutes=10)
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {name}, booking anda akan berakhir dalam 5 menit',
                 'user_id': instance.user.user_id,
                 'booking_id': None,
-                'eta': converted_datetime - datetime.timedelta(minutes=5)
+                'eta': converted_end_datetime - datetime.timedelta(minutes=5)
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {name}, booking anda telah berakhir',
                 'user_id': instance.user.user_id,
                 'booking_id': instance.booking_id,
-                'eta': converted_datetime
+                'eta': converted_end_datetime
             }
         ]
 
