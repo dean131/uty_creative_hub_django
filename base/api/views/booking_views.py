@@ -95,11 +95,12 @@ class BookingModelViewSet(ModelViewSet):
         bookings = self.get_queryset().filter(
             booking_date=booking_date,
             room__room_id=room_id,
-        ).values_list('bookingtime', flat=True)
+            bookingtime_id__in=bookingtime_id_list
+        )
 
-        if bookings.filter(bookingtime_id__in=bookingtime_id_list).exists():
+        if bookings.exists():
             return CustomResponse.bad_request(
-                message='Booking is already exists',
+                message='Booking tidak tersedia',
             )
         
         bookinginit = self.get_queryset().filter(
@@ -107,7 +108,7 @@ class BookingModelViewSet(ModelViewSet):
             user=request.user,
         ).first()
 
-        if bookinginit: bookinginit.delete() 
+        if bookinginit.exists(): bookinginit.delete() 
 
         request.data.update({
             'user': request.user.user_id,
@@ -119,7 +120,7 @@ class BookingModelViewSet(ModelViewSet):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return CustomResponse.created(
-                message='Booking initialized successfully',
+                message='Booking berhasil diinisialisasi',
                 data=serializer.data,
                 headers=headers
             )
@@ -150,7 +151,7 @@ class BookingModelViewSet(ModelViewSet):
 
         if not booking_status:
             return CustomResponse.bad_request(
-                message='Booking status is required',
+                message='Booking status diperlukan',
             )
 
         queryset = self.get_queryset().filter(
@@ -164,7 +165,7 @@ class BookingModelViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(
-            message='Booking history fetched successfully',
+            message='Booking berhasil diambil',
             data=serializer.data
         )
 
