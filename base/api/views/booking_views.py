@@ -135,12 +135,13 @@ class BookingModelViewSet(ModelViewSet):
         }
 
         user_status = request.user.verification_status
-        message = user_status_messages.get(user_status, 'Status akun tidak valid')
-
-        if user_status in user_status_messages:
-            return CustomResponse.ok(message=message)
-        else:
-            return CustomResponse.bad_request(message=message)
+        if user_status == 'verified':
+            return CustomResponse.ok(
+                message=user_status_messages[user_status],
+            )
+        return CustomResponse.bad_request(
+            message=user_status_messages.get(user_status, 'Status akun tidak valid'),
+        )
 
     @action(methods=['GET'], detail=False)
     def history(self, request, *args, **kwargs):
