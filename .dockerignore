@@ -1,2 +1,5 @@
 staticfiles/
 mediafiles/
+accounts/migrations/
+base/migrations/
+notification/migrations/
