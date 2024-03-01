@@ -124,12 +124,12 @@ def booking_status_notification(sender, instance, **kwargs):
     name = name_formater(instance.user.full_name)
 
     if instance.booking_status == "pending":
-        title = "Booking Submitted"
-        message = f"Hi {name}, your booking has been submitted and waiting for approval."
+        title = "Booking diajukan"
+        message = f"Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah diajukan"
 
     elif instance.booking_status == "active":
-        title = "Booking Approved"
-        message = f"Hi {name}, your booking has been approved."
+        title = "Booking disetujui"
+        message = f"Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah disetujui"
 
         bookingmembers = instance.bookingmember_set.filter().exclude(
             user=instance.user
@@ -168,35 +168,35 @@ def booking_status_notification(sender, instance, **kwargs):
         notification_dict = [
             {
                 'title': 'Pengingat Booking',
-                'message': f'Hai {name}, booking anda dengan ID reservasi {instance.booking_id} akan dimulai sebentar lagi',
+                'message': f'Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} akan dimulai sebentar lagi',
                 'user_id': instance.user.user_id,
                 'booking_id': None,
                 'eta': converted_start_datetime - datetime.timedelta(minutes=10)
             },
             {
                 'title': 'Pengingat Booking',
-                'message': f'Hai {name}, booking anda dengan ID reservasi {instance.booking_id} telah dimulai',
+                'message': f'Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah dimulai',
                 'user_id': instance.user.user_id,
                 'booking_id': None,
                 'eta': converted_start_datetime
             },
             {
                 'title': 'Pengingat Booking',
-                'message': f'Hai {name}, booking anda dengan ID reservasi {instance.booking_id} akan berakhir dalam 10 menit',
+                'message': f'Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} akan berakhir dalam 10 menit',
                 'user_id': instance.user.user_id,
                 'booking_id': None,
                 'eta': converted_end_datetime - datetime.timedelta(minutes=10)
             },
             {
                 'title': 'Pengingat Booking',
-                'message': f'Hai {name}, booking anda dengan ID reservasi {instance.booking_id} akan berakhir dalam 5 menit',
+                'message': f'Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} akan berakhir dalam 5 menit',
                 'user_id': instance.user.user_id,
                 'booking_id': None,
                 'eta': converted_end_datetime - datetime.timedelta(minutes=5)
             },
             {
                 'title': 'Pengingat Booking',
-                'message': f'Hai {name}, booking anda dengan ID reservasi {instance.booking_id} telah berakhir',
+                'message': f'Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah berakhir',
                 'user_id': instance.user.user_id,
                 'booking_id': instance.booking_id,
                 'eta': converted_end_datetime
@@ -216,15 +216,15 @@ def booking_status_notification(sender, instance, **kwargs):
 
     elif instance.booking_status == "rejected":
         title = "Booking ditolak"
-        message = f"Hai {name}, booking anda dengan ID reservasi {instance.booking_id} telah ditolak."
+        message = f"Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah ditolak."
 
     elif instance.booking_status == "completed":
         title = "Booking Selesai"
-        message = f"Hai {name}, booking anda dengan ID reservasi {instance.booking_id} telah selesai."
+        message = f"Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah selesai."
 
     elif instance.booking_status == "canceled":
         title = "Booking Dibatalkan"
-        message = f"Hai {name}, booking anda dengan ID reservasi {instance.booking_id} telah dibatalkan."
+        message = f"Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah dibatalkan."
         
     Notification.objects.create(
         notification_type='Booking',
