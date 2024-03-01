@@ -1,6 +1,4 @@
 venv
 .vscode
-migrations/
-__pycache__/
 staticfiles/
 mediafiles/
