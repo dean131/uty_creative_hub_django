@@ -56,6 +56,13 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+    
+    @property
+    def first_name(self):
+        if not self.full_name:
+            return ''
+        full_name = self.full_name.split(' ')
+        return full_name[1] if (len(full_name[0]) < 3 and len(full_name) > 1) else full_name[0]
 
     def has_perm(self, perm, obj=None):
         'Does the user have a specific permission?'

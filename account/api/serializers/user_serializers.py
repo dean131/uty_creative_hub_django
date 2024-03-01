@@ -7,8 +7,6 @@ from account.api.serializers.userprofile_serializers import (
     UserProfileUserDetailSerializer
 )
 
-from myapp.my_utils.string_formater import name_formater
-
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,7 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserDetailSerializer(UserSerializer):
     userprofile = serializers.SerializerMethodField()
-    first_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -44,14 +41,23 @@ class UserDetailSerializer(UserSerializer):
         except:
             pass
         return None
-    
-    def get_first_name(self, obj):
-        return name_formater(obj.full_name)
 
 
-class UserListSerializer(UserSerializer):
+class UserListSerializer(serializers.ModelSerializer):
     userprofile = serializers.SerializerMethodField()
-    first_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = [
+            'user_id',
+            'userprofile',
+            'full_name',
+            'first_name',
+            'email',
+            'is_active',
+            'is_admin',
+            'verification_status',
+        ]
 
     def get_userprofile(self, obj):
         try:
@@ -59,9 +65,6 @@ class UserListSerializer(UserSerializer):
         except:
             pass
         return None
-    
-    def get_first_name(self, obj):
-        return name_formater(obj.full_name)
 
 
 class UserRegisterSerializer(UserSerializer):
