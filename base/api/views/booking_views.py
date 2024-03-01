@@ -16,6 +16,7 @@ from base.api.serializers.booking_serializers import (
 
 from paho.mqtt import publish
 from django.conf import settings
+from django.db.models import Q
 
 
 class BookingModelViewSet(ModelViewSet):
@@ -93,6 +94,7 @@ class BookingModelViewSet(ModelViewSet):
         bookingtime_id_list = request.data.get('bookingtime_id_list')
 
         bookings = self.get_queryset().filter(
+            Q(booking_status='pending') | Q(booking_status='active'),
             booking_date=booking_date,
             room__room_id=room_id,
             bookingtime_id__in=bookingtime_id_list

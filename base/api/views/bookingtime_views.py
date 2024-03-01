@@ -40,8 +40,7 @@ class BookingTimeModelViewSet(ModelViewSet):
             )
 
         # Check if there is any booking on the same date and room
-        booking_queryset = Booking.objects.all()
-        bookingtime_ids = booking_queryset.filter(
+        bookingtime_ids = Booking.objects.filter(
             Q(booking_status='pending') | Q(booking_status='active'),
             booking_date=date,
             room__room_id=room_id,
