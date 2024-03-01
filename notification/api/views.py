@@ -21,7 +21,7 @@ class NotificationModelViewSet(ModelViewSet):
             queryset = queryset.filter(
                 Q(user__user_id=user.user_id) | Q(user__user_id=None),
                 created_at__gte=user.created_at
-            ).order_by('-created_at')
+            ).order_by('created_at')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
