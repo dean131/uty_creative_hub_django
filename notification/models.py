@@ -177,6 +177,13 @@ def booking_status_notification(sender, instance, **kwargs):
             },
             {
                 'title': 'Pengingat Booking',
+                'message': f'Hai {name}, booking anda telah dimulai',
+                'user_id': instance.user.user_id,
+                'booking_id': None,
+                'eta': converted_start_datetime
+            },
+            {
+                'title': 'Pengingat Booking',
                 'message': f'Hai {name}, booking anda akan berakhir dalam 10 menit',
                 'user_id': instance.user.user_id,
                 'booking_id': None,
