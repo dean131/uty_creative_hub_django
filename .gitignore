@@ -1,7 +1,6 @@
 venv
 .vscode
-staticfiles/
-mediafiles/
-accounts/migrations/
-base/migrations/
-notification/migrations/
+staticfiles
+mediafiles
+/migrations/
+
