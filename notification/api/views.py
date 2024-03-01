@@ -16,12 +16,12 @@ class NotificationModelViewSet(ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        user_id = request.query_params.get('user_id', None)
-        if user_id is not None:
+        if not request.user.is_admin:
+            user = request.user
             queryset = queryset.filter(
-                Q(user__user_id=user_id) |
-                Q(user__user_id=None)
-            ).order_by('created_at')
+                Q(user__user_id=user.user_id) | Q(user__user_id=None),
+                created_at__gte=user.created_at
+            ).order_by('-created_at')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -33,5 +33,3 @@ class NotificationModelViewSet(ModelViewSet):
             message='Notification list retrieved successfully.',
             data=serializer.data
         )
-
-
