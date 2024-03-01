@@ -124,11 +124,11 @@ def booking_status_notification(sender, instance, **kwargs):
     name = name_formater(instance.user.full_name)
 
     if instance.booking_status == "pending":
-        title = "Booking diajukan"
+        title = "Booking Diajukan"
         message = f"Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah diajukan"
 
     elif instance.booking_status == "active":
-        title = "Booking disetujui"
+        title = "Booking Disetujui"
         message = f"Hai {name}, booking anda dengan ID Reservasi #{instance.booking_id} telah disetujui"
 
         bookingmembers = instance.bookingmember_set.filter().exclude(
