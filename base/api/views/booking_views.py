@@ -231,7 +231,6 @@ class BookingModelViewSet(ModelViewSet):
                 message='Waktu booking sudah berakhir',
             )
 
-
         # Topik MQTT
         mqtt_topic = settings.MQTT_TOPIC
         # Pesan yang akan dipublish
