@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save, pre_delete
@@ -95,7 +97,7 @@ class Booking(models.Model):
         ("canceled", "Canceled")
     )
 
-    booking_id = models.AutoField(primary_key=True, unique=True, editable=False)
+    booking_id = models.CharField(max_length=10, primary_key=True, unique=True, editable=False)
     booking_date = models.DateField()
     booking_status = models.CharField(max_length=30, default="pending", choices=BOOKING_STATUS)
     booking_needs = models.TextField(null=True, blank=True)
@@ -108,6 +110,14 @@ class Booking(models.Model):
     
     def __str__(self):
         return self.room.room_name
+    
+    def save(self, *args, **kwargs):
+        if not self.booking_id:
+            custom_id = f'UCH-{uuid.uuid4().hex[:6].upper()}'
+            while Booking.objects.filter(booking_id=custom_id).exists():
+                custom_id = f'UCH-{uuid.uuid4().hex[:6].upper()}'
+            self.booking_id = custom_id
+        super().save(*args, **kwargs)
     
 
 class BookingMember(models.Model):
