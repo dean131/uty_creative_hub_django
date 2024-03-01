@@ -75,7 +75,7 @@ class RoomFacility(models.Model):
 
 
 class BookingTime(models.Model):
-    bookingtime_id = models.IntegerField(primary_key=True, unique=True, editable=True)
+    bookingtime_id = models.CharField(max_length=2, primary_key=True, unique=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
 
