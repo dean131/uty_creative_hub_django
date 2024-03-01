@@ -108,7 +108,7 @@ class BookingModelViewSet(ModelViewSet):
             user=request.user,
         ).first()
 
-        if bookinginit.exists(): bookinginit.delete() 
+        if bookinginit: bookinginit.delete() 
 
         request.data.update({
             'user': request.user.user_id,
