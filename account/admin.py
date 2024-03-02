@@ -12,5 +12,15 @@ class UserModelAdmin(admin.ModelAdmin):
         model = models.User
 
 
+class OTPCodeModelAdmin(admin.ModelAdmin):
+    list_display = ["user", "code"]
+    list_filter = ["user"]
+    search_fields = ["user", "code"]
+
+    class Meta:
+        model = models.OTPCode
+
+
+admin.site.register(models.OTPCode, OTPCodeModelAdmin)
 admin.site.register(models.User, UserModelAdmin)
 admin.site.register(models.UserProfile)
