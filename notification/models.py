@@ -129,7 +129,7 @@ def booking_status_notification(sender, instance, **kwargs):
 
         bookingmembers = instance.bookingmember_set.filter().exclude(
             user=instance.user
-        ).values('user__user_id', 'user__full_name')
+        ).values('user__user_id', 'user__full_name', 'user__first_name')
         
         for bookingmember in bookingmembers:
             Notification.objects.create(
