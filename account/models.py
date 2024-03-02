@@ -43,6 +43,7 @@ class User(AbstractBaseUser):
 
     user_id = models.CharField(max_length=100, primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(max_length=255, null=True, blank=True)
+    first_name = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
 
     verification_status = models.CharField(max_length=10, default='unverified', choices=VERIFICATION_STATUS)
@@ -58,11 +59,10 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
     
-    @property
-    def first_name(self):
+    def set_first_name(self):
         if not self.full_name:
             return ''
-        full_name = self.full_name.split(' ')
+        full_name = self.full_name.split('')
         return full_name[1] if (len(full_name[0]) < 3 and len(full_name) > 1) else full_name[0]
 
     def has_perm(self, perm, obj=None):
@@ -81,6 +81,10 @@ class User(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
     
+    def save(self, *args, **kwargs):
+        self.first_name = self.set_first_name()
+        super().save(*args, **kwargs)
+    
 
 class UserProfile(models.Model):
     userprofile_id = models.AutoField(primary_key=True, unique=True)
@@ -96,7 +100,7 @@ class UserProfile(models.Model):
     studyprogram = models.ForeignKey('base.StudyProgram', on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user.full_name if self.user.full_name else self.userprofile_id
+        return self.user.email
 
 
 class OTPCode(models.Model):
