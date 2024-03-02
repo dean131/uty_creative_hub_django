@@ -97,7 +97,7 @@ class UserViewSet(ModelViewSet):
             )
         # END EMAIL VALIDATOR
 
-        otp_obj = OTPCode.objects.update_or_create(user__email=email_dest, user__is_active=False).first()
+        otp_obj = OTPCode.objects.filter(user__email=email_dest, user__is_active=False).first()
         if otp_obj:
             otp_obj.code = otp_code
             otp_obj.save()
