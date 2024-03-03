@@ -46,7 +46,7 @@ class UserViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.retrieve(
-            message='Successfully retrieved data',
+            message='Berhasil mengambil data',
             data=serializer.data,
         )
         
@@ -61,39 +61,39 @@ class UserViewSet(ModelViewSet):
         # PASSWORD VALIDATOR
         if not password:
             return CustomResponse.bad_request(
-                message='Password is required',
+                message='Password tidak boleh kosong',
             )
         
         if not confirm_password:
             return CustomResponse.bad_request(
-                message='Confirm password is required',
+                message='Password konfirmasi tidak boleh kosong',
             )
         
         if password != confirm_password:
             return CustomResponse.bad_request(
-                message='Password and confirm password must be same',
+                message='Password dan Password konfirmasi harus sama',
             )
         
         if len(password) < 8:
             return CustomResponse.bad_request(
-                message='Password must be at least 8 characters',
+                message='Password harus minimal 8 karakter',
             )
         # END PASSWORD VALIDATOR
         
         # EMAIL VALIDATOR
         if not email_dest:
             return CustomResponse.bad_request(
-                message='Email is required',
+                message='Email tidak boleh kosong',
             )
         
         if '@' not in email_dest:
             return CustomResponse.bad_request(
-                message='Email must be contain @',
+                message='Email harus mengandung @',
             )
         
         if User.objects.filter(email=email_dest, is_active=True).exists():
             return CustomResponse.bad_request(
-                message='Email already exists',
+                message='Email sudah terdaftar',
             )
         # END EMAIL VALIDATOR
 
@@ -105,7 +105,7 @@ class UserViewSet(ModelViewSet):
             otp_obj.user.save()
             send_otp_celery.delay(email_dest, otp_code)
             return CustomResponse.ok(
-                message='OTP Code has been sent to your email',
+                message='Berhasil mengirimkan OTP ke email anda',
             )
 
         serializer = UserRegisterSerializer(data=request.data)
@@ -117,7 +117,7 @@ class UserViewSet(ModelViewSet):
             )
             send_otp_celery.delay(email_dest, otp_code)
             return CustomResponse.ok(
-                message='OTP Code has been sent to your email',
+                message='Berhasil mengirimkan OTP ke email anda',
             )
         return CustomResponse.serializers_erros(errors=serializer.errors)
 
@@ -129,47 +129,47 @@ class UserViewSet(ModelViewSet):
         # EMAIL VALIDATOR
         if not email:
             return CustomResponse.bad_request(
-                message='Email is required',
+                message='Email tidak boleh kosong',
             )
         
         if '@' not in email:
             return CustomResponse.bad_request(
-                message='Email must be contain @',
+                message='Email harus mengandung @',
             )
         
         user = User.objects.filter(email=email).first()
         if not user:
             return CustomResponse.bad_request(
-                message='Email is not found',
+                message='Email belum terdaftar',
             )
         
         if user.is_active == False:
             return CustomResponse.bad_request(
-                message='Please complete your registration first',
+                message='Silahkan selesaikan registrasi terlebih dahulu',
             )
         # END EMAIL VALIDATOR
 
         # PASSWORD VALIDATOR
         if not password:
             return CustomResponse.bad_request(
-                message='Password is required',
+                message='Password tidak boleh kosong',
             )
         
         if len(password) < 8:
             return CustomResponse.bad_request(
-                message='Password must be at least 8 characters',
+                message='Password harus mengandung setidakya 8 karakter',
             )
         # END PASSWORD VALIDATOR
         
         if not user.check_password(password):
             return CustomResponse.bad_request(
-                message='Password is wrong',
+                message='Password yang anda masukan salah',
             )
 
         authenticated_user = authenticate(request, username=email, password=password)
         if user is None:
             return CustomResponse.bad_request(
-                message='User is not found',
+                message='Penguna tidak ditemukan',
             )
         
         refresh = RefreshToken.for_user(authenticated_user)
@@ -189,7 +189,7 @@ class UserViewSet(ModelViewSet):
         return Response(
             {
                 'success': True,
-                'message': 'Successfully logged in',
+                'message': 'Berhasil login',
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             }
@@ -203,17 +203,17 @@ class UserViewSet(ModelViewSet):
         otp_obj = OTPCode.objects.filter(code=otp_code, user__email=email).first()
         if not otp_obj:
             return CustomResponse.bad_request(
-                message='OTP Code is invalid',
+                message='Kode OTP tidak valid',
             )
 
         if timezone.now() > otp_obj.expire:
             return CustomResponse.bad_request(
-                message='OTP Code is expired',
+                message='OTP kedaluwarsa',
             )
             
         serializer = self.get_serializer(otp_obj.user)
         return CustomResponse.retrieve(
-            message='Email is verified',
+            message='OTP valid',
             data=serializer.data,
         )
 
@@ -221,7 +221,7 @@ class UserViewSet(ModelViewSet):
     def logout(self, request):
         logout(request)
         return CustomResponse.ok(
-            message='Successfully logged out',
+            message='Berhasil logout',
         )
 
     @action(methods=['POST'], detail=False)
@@ -233,41 +233,41 @@ class UserViewSet(ModelViewSet):
         # PASSWORD VALIDATOR
         if not old_password:
             return CustomResponse.bad_request(
-                message='Old password is required',
+                message='Password lama tidak boleh kosong',
             )
         
         if not new_password:
             return CustomResponse.bad_request(
-                message='New password is required',
+                message='Password baru tidak boleh kosong',
             )
         
         if not confirm_password:
             return CustomResponse.bad_request(
-                message='Confirm password is required',
+                message='Password konfirmasi tidak boleh kosong',
             )
         
         if new_password != confirm_password:
             return CustomResponse.bad_request(
-                message='New password and confirm password must be same',
+                message='Password baru dan Password konfirmasi must be same',
             )
         
         if len(new_password) < 8:
             return CustomResponse.bad_request(
-                message='New password must be at least 8 characters',
+                message='Password baru harus mengandung setidakya 8 karakter',
             )
         # END PASSWORD VALIDATOR
 
         user = request.user
         if not user.check_password(old_password):
             return CustomResponse.bad_request(
-                message='Old password is wrong',
+                message='Password lama yang anda masukan salah',
             )
         
         user.set_password(new_password)
         user.save()
 
         return CustomResponse.ok(
-            message='Password has been changed',
+            message='Berhasil mengganti password',
         )
 
     @action(methods=['POST'], detail=False)
@@ -279,12 +279,12 @@ class UserViewSet(ModelViewSet):
         otp_obj = OTPCode.objects.filter(user=user).first()
         if otp_obj.code != otp_code:
             return CustomResponse.bad_request(
-                message='OTP Code is invalid',
+                message='Kode OTP tidak valid',
             )
 
         if timezone.now() > otp_obj.expire:
             return CustomResponse.bad_request(
-                message='OTP Code is expired',
+                message='Kode OTP kedaluarsa',
             )
         
         user = request.user
@@ -293,7 +293,7 @@ class UserViewSet(ModelViewSet):
             
         serializer = self.get_serializer(otp_obj.user)
         return CustomResponse.retrieve(
-            message='Email is changed',
+            message='Email berhasil diubah',
             data=serializer.data,
         )
 
@@ -305,22 +305,22 @@ class UserViewSet(ModelViewSet):
         # PASSWORD VALIDATOR
         if not password:
             return CustomResponse.bad_request(
-                message='Password is required',
+                message='Password tidak boleh kosong',
             )
         
         if len(password) < 8:
             return CustomResponse.bad_request(
-                message='Password must be at least 8 characters',
+                message='Password harus mengandung setidakya 8 karakter',
             )
         
         if not user.check_password(password):
             return CustomResponse.bad_request(
-                message='Password is wrong',
+                message='Password yang anda masukan salah',
             )
         # END PASSWORD VALIDATOR
 
         return CustomResponse.ok(
-            message='Password is valid',
+            message='Password valid',
         )
 
     @action(methods=['POST'], detail=False)
@@ -331,18 +331,18 @@ class UserViewSet(ModelViewSet):
         # EMAIL VALIDATOR
         if not email:
             return CustomResponse.bad_request(
-                message='Email is required',
+                message='Email tidak boleh kosong',
             )
         
         if '@' not in email:
             return CustomResponse.bad_request(
-                message='Email must be contain @',
+                message='Email harus mengandung @',
             )
         
         user = User.objects.filter(email=email, is_active=False).first()
         if not user:
             return CustomResponse.bad_request(
-                message='Email is not found',
+                message='Email belum terdaftar',
             )
         # END EMAIL VALIDATOR
 
@@ -352,10 +352,10 @@ class UserViewSet(ModelViewSet):
             otp_obj.save()
             send_otp_celery.delay(email, otp_code)
             return CustomResponse.ok(
-                message='OTP Code has been sent to your email',
+                message='Berhasil mengirim kode OTP ke email anda',
             )
         return CustomResponse.not_found(
-            message='OTP Code is not Found',
+            message='Kode OTP tidak valid',
         )
 
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
@@ -366,18 +366,18 @@ class UserViewSet(ModelViewSet):
         # EMAIL VALIDATOR
         if not email:
             return CustomResponse.bad_request(
-                message='Email is required',
+                message='Email tidak boleh kosong',
             )
         
         if '@' not in email:
             return CustomResponse.bad_request(
-                message='Email must be contain @',
+                message='Email harus mengandung @',
             )
         
         user = User.objects.filter(email=email, is_active=True).first()
         if not user:
             return CustomResponse.bad_request(
-                message='Email is not found',
+                message='Email belum terdaftar',
             )
         # END EMAIL VALIDATOR
 
@@ -389,11 +389,11 @@ class UserViewSet(ModelViewSet):
             send_otp_celery.delay(email, otp_code, user.full_name)
 
             return CustomResponse.ok(
-                message='OTP Code has been sent to your email',
+                message='Berhasil mengirim kode OTP ke email anda',
             )
         
         return CustomResponse.not_found(
-            message='OTP Code is not Found',
+            message='Kode OTP tidak valid',
         )    
 
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
@@ -404,12 +404,12 @@ class UserViewSet(ModelViewSet):
         # EMAIL VALIDATOR
         if not email:
             return CustomResponse.bad_request(
-                message='Email is required',
+                message='Email tidak boleh kosong',
             )
         
         if '@' not in email:
             return CustomResponse.bad_request(
-                message='Email must be contain @',
+                message='Email harus mengandung @',
             )
         # END EMAIL VALIDATOR
 
@@ -422,11 +422,11 @@ class UserViewSet(ModelViewSet):
             send_otp_celery.delay(email, otp_code, user.full_name)
 
             return CustomResponse.ok(
-                message='OTP Code has been sent to your email',
+                message='Berhasil mengirim kode OTP ke email anda',
             )
         
         return CustomResponse.not_found(
-            message='OTP Code is not Found',
+            message='Kode OTP tidak valid',
         )
 
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny])
@@ -438,47 +438,47 @@ class UserViewSet(ModelViewSet):
         # EMAIL VALIDATOR
         if not email:
             return CustomResponse.bad_request(
-                message='Email is required',
+                message='Email tidak boleh kosong',
             )
         
         if '@' not in email:
             return CustomResponse.bad_request(
-                message='Email must be contain @',
+                message='Email harus mengandung @',
             )
         
         user = User.objects.filter(email=email, is_active=True).first()
         if not user:
             return CustomResponse.bad_request(
-                message='Email is not found',
+                message='Email belum terdaftar',
             )
         # END EMAIL VALIDATOR
 
         # PASSWORD VALIDATOR
         if not new_password:
             return CustomResponse.bad_request(
-                message='New password is required',
+                message='Password baru tidak boleh kosong',
             )
         
         if not confirm_password:
             return CustomResponse.bad_request(
-                message='Confirm password is required',
+                message='Password konfirmasi tidak boleh kosong',
             )
         
         if new_password != confirm_password:
             return CustomResponse.bad_request(
-                message='New password and confirm password must be same',
+                message='Password baru dan Password konfirmasi must be same',
             )
         
         if len(new_password) < 8:
             return CustomResponse.bad_request(
-                message='New password must be at least 8 characters',
+                message='Password baru harus mengandung setidakya 8 karakter',
             )
         # END PASSWORD VALIDATOR
 
         user = User.objects.filter(email=email, is_active=True).first()
         if not user:
             return CustomResponse.bad_request(
-                message='Email is not found',
+                message='Email belum terdaftar',
             )
         
         user.set_password(new_password)
@@ -496,12 +496,12 @@ class UserViewSet(ModelViewSet):
         # EMAIL VALIDATOR
         if not email:
             return CustomResponse.bad_request(
-                message='Email is required',
+                message='Email tidak boleh kosong',
             )
         
         if '@' not in email:
             return CustomResponse.bad_request(
-                message='Email must be contain @',
+                message='Email harus mengandung @',
             )
         # END EMAIL VALIDATOR
 
@@ -513,11 +513,11 @@ class UserViewSet(ModelViewSet):
             send_otp_celery.delay(email, otp_code, otp_obj.user.full_name)
 
             return CustomResponse.ok(
-                message='OTP Code has been sent to your email',
+                message='Berhasil mengirim kode OTP ke email anda',
             )
         
         return CustomResponse.not_found(
-            message='OTP Code is not Found',
+            message='Kode OTP tidak valid',
         )
 
     @action(methods=['POST'], detail=True)
@@ -527,18 +527,18 @@ class UserViewSet(ModelViewSet):
 
         if not verification_status:
             return CustomResponse.bad_request(
-                message='Verification status is required',
+                message='Status verifikasi tidak boleh kosong',
             )
         
         if verification_status not in ['verified', 'rejected', 'suspend']:
             return CustomResponse.bad_request(
-                message='Verification status is invalid',
+                message='Status verifikasi tidak valid',
             )
         
         user.verification_status = verification_status
         user.save()
         return CustomResponse.ok(
-            message='User status has been changed',
+            message='Status verifikasi berhasil diubah',
         )
 
 
