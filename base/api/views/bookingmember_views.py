@@ -28,12 +28,12 @@ class BookingMemberModelViewSet(ModelViewSet):
         
         if not userprofile:
             return CustomResponse.not_found(
-                message="Student is not registered"
+                message="Pengguna tidak ditemukan"
             )
         
         if userprofile.user.verification_status != 'verified':
             return CustomResponse.bad_request(
-                message="Student is not verified"
+                message="Pengguna belum terverifikasi"
             )
         
         booking = request.user.booking_set.filter(
@@ -43,7 +43,7 @@ class BookingMemberModelViewSet(ModelViewSet):
             user=userprofile.user,
             booking=booking).exists():
             return CustomResponse.bad_request(
-                message="Student ID Number already exists"
+                message="NPM sudah terdaftar dalam booking ini"
             )
 
         request.data.update({
@@ -58,7 +58,7 @@ class BookingMemberModelViewSet(ModelViewSet):
             serializer = BookingMemberBookingDetailSerializer(bookingmember)
             return CustomResponse.created(
                 data=serializer.data,
-                message="Booking member created successfully",
+                message="Booking member berhasil dibuat",
                 headers=headers
             )
         return CustomResponse.serializers_erros(serializer.errors)
@@ -69,15 +69,15 @@ class BookingMemberModelViewSet(ModelViewSet):
             student_id_number = instance.booking.user.userprofile.student_id_number
             if student_id_number == instance.user.userprofile.student_id_number:
                 return CustomResponse.bad_request(
-                    message="You can't delete yourself",
+                    message="Tidak bisa menghapus diri sendiri dari booking member",
                 )
             self.perform_destroy(instance)
             return CustomResponse.ok(
-                message="Booking member deleted successfully",
+                message="Booking member berhasil dihapus",
             )
         except:
             return CustomResponse.not_found(
-                message="Booking member not found",
+                message="Booking member tidak ditemukan",
             )
 
 

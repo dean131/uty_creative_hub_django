@@ -31,12 +31,12 @@ class BookingTimeModelViewSet(ModelViewSet):
 
         if not date:
             return CustomResponse.bad_request(
-                message='Date is required'
+                message='Tanggal booking tidak boleh kosong'
             )
 
         if not room_id:
             return CustomResponse.bad_request(
-                message='Room ID is required'
+                message='Room Id tidak boleh kosong'
             )
 
         # Check if there is any booking on the same date and room
@@ -60,10 +60,10 @@ class BookingTimeModelViewSet(ModelViewSet):
 
         if serializer.data == []:
             return CustomResponse.not_found(
-                message='No available booking times found'
+                message='Tidak ada available booking times pada tanggal tersebut'
             )
 
         return CustomResponse.list(
             data=serializer.data,
-            message='Available booking times retrieved successfully',
+            message='Available booking times berhasil diambil',
         )

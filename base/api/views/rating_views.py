@@ -18,7 +18,7 @@ class RatingModelViewSet(ModelViewSet):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return CustomResponse.created(
-                message='Rating created successfully',
+                message='Rating berhasil dibuat',
                 data=serializer.data,
                 headers=headers,
             )

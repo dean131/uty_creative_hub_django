@@ -30,6 +30,6 @@ class NotificationModelViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(
-            message='Notification list retrieved successfully.',
+            message='Berhasil mengambil data',
             data=serializer.data
         )

@@ -38,7 +38,7 @@ class BookingModelViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.retrieve(
-            message='Booking fetched successfully',
+            message='Booking berhasil diambil',
             data=serializer.data
         )
 
@@ -54,7 +54,7 @@ class BookingModelViewSet(ModelViewSet):
 
         if not bookinginit:
             return CustomResponse.bad_request(
-                message='Booking is not initiated yet',
+                message='Booking belum diinisialisasi',
             )
         
 
@@ -84,7 +84,7 @@ class BookingModelViewSet(ModelViewSet):
             
         bookinginit.delete()
         return CustomResponse.ok(
-            message='Booking created successfully',
+            message='Booking berhasil dibuat',
         )
 
     @action(methods=['POST'], detail=False)

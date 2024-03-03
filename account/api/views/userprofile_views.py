@@ -35,13 +35,13 @@ class UserProfileViewSet(ModelViewSet):
 
         if not email:
             return CustomResponse.bad_request(
-                message='Email is required.'
+                message='Email tidak boleh kosong.'
             )
         
         user = User.objects.filter(email=email, is_active=False, verification_status='unverified').first()
         if not user:
             return CustomResponse.bad_request(
-                message='User is not found.'
+                message='Pengguna tidak ditemukan'
             )
         
         user.full_name = full_name

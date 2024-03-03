@@ -21,7 +21,7 @@ class FacultyModelViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(
-            message="List of all faculties fetched successfully",
+            message="List faculties berhasil diambil",
             data=serializer.data
         )
     

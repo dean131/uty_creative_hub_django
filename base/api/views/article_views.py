@@ -35,7 +35,7 @@ class ArticleModelViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(
-            message='Articles retrieved successfully',
+            message='Articles berhasil diambil',
             data=serializer.data,
         )
     
@@ -43,7 +43,7 @@ class ArticleModelViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.retrieve(
-            message='Article retrieved successfully',
+            message='Article berhasil diambil',
             data=serializer.data
         )
     
@@ -53,7 +53,7 @@ class ArticleModelViewSet(ModelViewSet):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return CustomResponse.created(
-                message='Article created successfully',
+                message='Article berhasil dibuat',
                 data=serializer.data,
                 headers=headers
             )

@@ -75,7 +75,7 @@ class TestRegister(APITestCase):
         response = self.client.post(reverse('userprofile-list'), data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['success'], True)
-        self.assertEqual(response.data['message'], 'User profile created successfully')
+        self.assertEqual(response.data['message'], 'User profile berhasil dibuat')
 
         user = User.objects.filter(email='banjarbanjar23@gmail.com').first()
         self.assertEqual(user.is_active, True)

@@ -30,7 +30,7 @@ class RoomImageModelViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(
-            message='RoomImages retrieved successfully',
+            message='RoomImages berhasil diambil',
             data=serializer.data,
         )
     
@@ -40,7 +40,7 @@ class RoomImageModelViewSet(ModelViewSet):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return CustomResponse.created(
-                message='RoomImage created successfully',
+                message='RoomImage berhasil dibuat',
                 data=serializer.data,
                 headers=headers
             )
@@ -50,7 +50,7 @@ class RoomImageModelViewSet(ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return CustomResponse.deleted(
-            message='RoomImage deleted successfully'
+            message='RoomImage berhasil dihapus'
         )
         
 
