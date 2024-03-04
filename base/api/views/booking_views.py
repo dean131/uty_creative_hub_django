@@ -234,7 +234,7 @@ class BookingModelViewSet(ModelViewSet):
             )
 
         # Topik MQTT
-        mqtt_topic = settings.MQTT_TOPIC
+        mqtt_topic = 'uch/pintu'
         # Pesan yang akan dipublish
         message = 'True'
 
@@ -242,8 +242,8 @@ class BookingModelViewSet(ModelViewSet):
         publish.single(
             mqtt_topic, 
             message, 
-            hostname=settings.MQTT_SERVER, 
-            port=settings.MQTT_PORT,
+            hostname='test.mosquitto.org', 
+            port=1883,
         )
     
         return CustomResponse.ok(
