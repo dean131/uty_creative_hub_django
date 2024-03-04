@@ -39,6 +39,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost:1337',
     'https://uch.faiznazhir.com',
     'http://139.59.117.115:1337',
+    'https://beuch.e-vodes.com',
 ]
 
 AUTH_USER_MODEL = "account.User"
