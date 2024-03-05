@@ -26,10 +26,13 @@ from firebase_admin import credentials
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-#_@z!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', True)
+DEBUG = os.environ.get('DEBUG') == 'True'
 
 # ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(' ')
 ALLOWED_HOSTS = ['*']
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
 
 # CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:1337').split(' ')
 CSRF_TRUSTED_ORIGINS = [
@@ -221,10 +224,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SMTP Configurations
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True) == 'True'
 
 # Celery Configurations
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://127.0.0.1:6379/0')
@@ -238,7 +241,7 @@ firebase_admin.initialize_app(cred)
 
 # MQTT Configurations
 MQTT_SERVER = os.environ.get('MQTT_SERVER', 'localhost')
-MQTT_PORT = os.environ.get('MQTT_PORT', 1883)
+MQTT_PORT = int(os.environ.get('MQTT_PORT', 1883))
 MQTT_TOPIC = os.environ.get('MQTT_TOPIC', 'uch/pintu')
 
 
