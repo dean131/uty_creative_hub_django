@@ -57,6 +57,7 @@ services:
     ports:
       - 1337:80
     volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
       - static_volume:/app/staticfiles
       - media_volume:/app/mediafiles
     depends_on:
