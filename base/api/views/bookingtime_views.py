@@ -22,6 +22,25 @@ class BookingTimeModelViewSet(ModelViewSet):
         if self.action == 'available':
             return BookingTimeAvaliableModelSerializer
         return super().get_serializer_class()
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return CustomResponse.created(
+                message='BookingTime berhasil dibuat',
+                data=serializer.data,
+                headers=headers
+            )
+        return CustomResponse.serializers_erros(serializer.errors)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return CustomResponse.deleted(
+            message='BookingTime berhasil dihapus'
+        )
 
     @action(methods=['GET'], detail=False)
     def available(self, request, *args, **kwargs):
