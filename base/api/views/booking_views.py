@@ -197,6 +197,8 @@ class BookingModelViewSet(ModelViewSet):
         
         booking.booking_status = booking_status
         booking.save()
+        booking.user.verrifcation_status = 'suspend'
+        booking.user.save()
         return CustomResponse.ok(
             message='Booking status berhasil diubah',
         )
