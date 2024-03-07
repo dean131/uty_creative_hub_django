@@ -234,9 +234,7 @@ class BookingModelViewSet(ModelViewSet):
             return CustomResponse.bad_request(
                 message='Waktu booking sudah berakhir',
             )
-
-        # Topik MQTT
-        mqtt_topic = 'uch/pintu'
+        
         # Pesan yang akan dipublish
         message = 'True'
 
