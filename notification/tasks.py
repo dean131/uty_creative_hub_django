@@ -21,6 +21,6 @@ def send_scheduled_notification(title, body, user_id, booking_id=None):
         booking.booking_status = "completed"
         booking.save()
 
-    return True
+    return body
     
     

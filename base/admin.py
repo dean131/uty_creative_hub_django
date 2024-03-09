@@ -15,6 +15,7 @@ from .models import (
     Rating,
     Committee,
     Banner,
+    CeleryTask,
 )
 
 
@@ -40,4 +41,5 @@ admin.site.register(BookingMember)
 admin.site.register(Rating)
 admin.site.register(Committee)
 admin.site.register(Banner)
+admin.site.register(CeleryTask)
 

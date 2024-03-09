@@ -32,6 +32,9 @@ services:
   uch_redis:
     container_name: uch_redis
     image: redis:7-alpine 
+    command: redis-server --dir /data 
+    volumes:
+      - celery_data_volume:/data
 
   uch_celery_worker:
     container_name: uch_celery_worker
@@ -70,3 +73,5 @@ volumes:
     name: media_volume
   db_volume:
     name: db_volume
+  celery_data_volume:
+    name: celery_data_volume

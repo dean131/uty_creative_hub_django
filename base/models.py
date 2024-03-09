@@ -215,6 +215,14 @@ class Banner(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class CeleryTask(models.Model):
+    celerytask_id = models.AutoField(primary_key=True, unique=True, editable=False)
+    task_id = models.CharField(max_length=100)
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.task_id
+
 
 ### SIGNALS ###
 @receiver(post_save, sender=Booking)
