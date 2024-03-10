@@ -1,4 +1,5 @@
 import uuid
+from django.utils import timezone
 
 from django.db import models
 from django.conf import settings
@@ -94,7 +95,8 @@ class Booking(models.Model):
         ("active", "Active"),
         ("completed", "Completed"),
         ("rejected", "Rejected"),
-        ("canceled", "Canceled")
+        ("canceled", "Canceled"),
+        ("expired", "Expired"),
     )
 
     booking_id = models.CharField(max_length=10, primary_key=True, unique=True, editable=False)
@@ -112,13 +114,29 @@ class Booking(models.Model):
         return self.room.room_name
     
     def save(self, *args, **kwargs):
+        # Generate unique custom booking_id
         if not self.booking_id:
             custom_id = f'UCH-{uuid.uuid4().hex[:6].upper()}'
             while Booking.objects.filter(booking_id=custom_id).exists():
                 custom_id = f'UCH-{uuid.uuid4().hex[:6].upper()}'
             self.booking_id = custom_id
+
         super().save(*args, **kwargs)
+
+    # return True if booking is expired
+    @property
+    def is_expired(self):
+        date = self.booking_date
+        time = self.bookingtime.start_time
+        aware_date = timezone.make_aware(timezone.datetime.combine(date, time))
+        return aware_date <= timezone.now()
     
+    def reschedule(self, new_booking_date, new_bookingtime):
+        self.booking_date = new_booking_date
+        self.bookingtime = new_bookingtime
+        self.booking_status = "active"
+        self.save()
+          
 
 class BookingMember(models.Model):
     bookingmember_id = models.AutoField(primary_key=True, unique=True, editable=False)

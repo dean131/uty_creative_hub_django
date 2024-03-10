@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 
 from myapp.custom_pagination import CustomPaginationSerializer
 from myapp.my_utils.custom_response import CustomResponse
-from base.models import Booking, BookingMember
+from base.models import Booking, BookingMember, CeleryTask, BookingTime
 from base.api.serializers.booking_serializers import (
     BookingSerializer,
     BookingDetailModelSerializer,
@@ -17,6 +17,11 @@ from base.api.serializers.booking_serializers import (
 from paho.mqtt import publish
 from django.conf import settings
 from django.db.models import Q
+from django.db import transaction
+
+from celery.result import AsyncResult
+
+from notification.tasks import create_notification
 
 
 class BookingModelViewSet(ModelViewSet):
@@ -250,4 +255,62 @@ class BookingModelViewSet(ModelViewSet):
             message='Berhasil scan QR Code',
         )
 
+    @transaction.atomic
+    @action(methods=['POST'], detail=True)
+    def reschedule(self, request, *args, **kwargs):
+        booking = self.get_object()
+        new_booking_date = request.data.get('booking_date')
+        new_bookingtime = request.data.get('bookingtime')
 
+        if not new_bookingtime:
+            return CustomResponse.bad_request(
+                message='Waktu baru diperlukan',
+            )
+        
+        bookingtime = BookingTime.objects.filter(bookingtime_id=new_bookingtime).first()
+
+        if not new_booking_date:
+            return CustomResponse.bad_request(
+                message='Tanggal baru diperlukan',
+            )
+        
+        if str(booking.booking_date) == new_booking_date and booking.bookingtime == bookingtime:
+            return CustomResponse.bad_request(
+                message='Booking tidak dapat direschedule ke waktu yang sama',
+            )
+        
+        if booking.booking_status not in ['pending', 'active']:
+            return CustomResponse.bad_request(
+                message='Booking tidak dapat direschedule',
+            )
+        
+        # Check if time is booked
+        booking_exists = Booking.objects.filter(
+            booking_date=new_booking_date, 
+            bookingtime=bookingtime
+        ).exclude(booking_id=booking.booking_id).first()
+        if booking_exists:
+            return CustomResponse.bad_request(
+                message=f'Gagal direschedule, booking telah ada. Kode booking: {booking_exists.booking_id}',
+            )
+        
+        celerytasks = CeleryTask.objects.filter(booking=booking)
+        if celerytasks.exists():
+            for celerytask in celerytasks:
+                task = AsyncResult(celerytask.task_id)
+                task.revoke()
+        celerytasks.delete()
+
+        booking.reschedule(new_booking_date, bookingtime)
+
+        create_notification.delay(
+            title='Reschedule Booking',
+            body=f'Booking {booking.booking_id} berhasil direschedule',
+            user_id=booking.user.user_id,
+            booking_id=None,
+            write=True,
+        )
+            
+        return CustomResponse.ok(
+            message='Booking berhasil direschedule',
+        )

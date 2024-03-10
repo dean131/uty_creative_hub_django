@@ -1,3 +1,6 @@
+import datetime
+
+from django.utils import timezone
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -13,9 +16,11 @@ from base.models import (
     CeleryTask,
 )
 
-from django.utils import timezone
-import datetime
-from .tasks import send_scheduled_notification
+from .tasks import (
+    send_scheduled_notification,
+    booking_expired_check,
+
+)
 
 from firebase_admin import messaging
 
@@ -29,29 +34,50 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=50)
     notification_topic = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    write = models.BooleanField(default=True)
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None, null=True, blank=True)
 
     def __str__(self):
         return self.notification_title
-
-
-@receiver(post_save, sender=Notification)
-def notification_created(sender, instance, created, **kwargs):
-    if created:
-        message = messaging.Message(
-            data={
-                'title': instance.notification_title,
-                'body': instance.notification_body,
-            },
-            topic=instance.notification_topic,
-            android=messaging.AndroidConfig(
-                priority='high',
-            )
-        )
     
-    response = messaging.send(message)
-    print('Successfully sent message:', response)
+    def save(self, *args, **kwargs):
+        if not self.notification_id:
+            message = messaging.Message(
+                data={
+                    'title': self.notification_title,
+                    'body': self.notification_body,
+                },
+                topic=self.notification_topic,
+                android=messaging.AndroidConfig(
+                    priority='high',
+                )
+            )
+            messaging.send(message)
+        
+        # if self.write equals to False, then don't save the notification
+        if self.write:
+            super().save(*args, **kwargs)
+        else:
+            return False
+
+
+# @receiver(post_save, sender=Notification)
+# def notification_created_send_notification(sender, instance, created, **kwargs):
+#     if created:
+#         message = messaging.Message(
+#             data={
+#                 'title': instance.notification_title,
+#                 'body': instance.notification_body,
+#             },
+#             topic=instance.notification_topic,
+#             android=messaging.AndroidConfig(
+#                 priority='high',
+#             )
+#         )
+    
+#     response = messaging.send(message)
+#     print('NOTIFICATION SENT SUCCESSFULLY: ', response)
 
 @receiver(pre_save, sender=User)
 def user_verification_status(sender, instance, **kwargs):
@@ -115,10 +141,10 @@ def booking_status_notification(sender, instance, **kwargs):
     if not booking:
         return False
     
+    # Check if booking status is not changed
     if booking.booking_status == instance.booking_status:
         return False
-
-
+    
     ## Create notification
     title = ""
     message = ""
@@ -126,51 +152,85 @@ def booking_status_notification(sender, instance, **kwargs):
     if instance.booking_status == "pending":
         title = "Booking Diajukan"
         message = f"Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah diajukan"
+        
+        # Combine date and time
+        combined_start_time = datetime.datetime.combine(
+            instance.booking_date, 
+            instance.bookingtime.start_time
+        )
+
+        # Make combined date and time aware
+        aware_start_date_time = timezone.make_aware(
+            combined_start_time, 
+            timezone.get_current_timezone()
+        )
+        
+        task = booking_expired_check.apply_async(
+            (instance.booking_id,),
+            eta=aware_start_date_time
+        )
+
+        print(f"\nMENAMBAH TASK (BOOKING EXPIRED CHECK): {task.id}")
 
     elif instance.booking_status == "active":
         title = "Booking Disetujui"
         message = f"Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah disetujui"
    
-        date = instance.booking_date
-        start_time = instance.bookingtime.start_time
-        end_time = instance.bookingtime.end_time
-
-        combined_start_time = datetime.datetime.combine(date, start_time)
-        combined_end_time = datetime.datetime.combine(date, end_time)
+        # Combine date and time
+        combined_start_time = datetime.datetime.combine(
+            instance.booking_date, 
+            instance.bookingtime.start_time
+        )
+        combined_end_time = datetime.datetime.combine(
+            instance.booking_date, 
+            instance.bookingtime.end_time
+        )
         
-        converted_start_datetime = timezone.make_aware(combined_start_time, timezone.get_current_timezone())
-        converted_end_datetime = timezone.make_aware(combined_end_time, timezone.get_current_timezone())
+        # Make combined date and time aware
+        aware_start_date_time = timezone.make_aware(
+            combined_start_time, 
+            timezone.get_current_timezone()
+        )
+        aware_end_date_time = timezone.make_aware(
+            combined_end_time, 
+            timezone.get_current_timezone()
+        )
 
         notification_dict = [
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} akan dimulai sebentar lagi',
                 'booking_id': None,
-                'eta': converted_start_datetime - datetime.timedelta(minutes=10)
+                'eta': aware_start_date_time - datetime.timedelta(minutes=10),
+                'write': True
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah dimulai',
                 'booking_id': None,
-                'eta': converted_start_datetime
+                'eta': aware_start_date_time,
+                'write': True
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} akan berakhir dalam 10 menit',
                 'booking_id': None,
-                'eta': converted_end_datetime - datetime.timedelta(minutes=10)
+                'eta': aware_end_date_time - datetime.timedelta(minutes=10),
+                'write': True
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} akan berakhir dalam 5 menit',
                 'booking_id': None,
-                'eta': converted_end_datetime - datetime.timedelta(minutes=5)
+                'eta': aware_end_date_time - datetime.timedelta(minutes=5),
+                'write': True
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah berakhir',
                 'booking_id': instance.booking_id,
-                'eta': converted_end_datetime
+                'eta': aware_end_date_time,
+                'write': True
             }
         ]
         
@@ -184,6 +244,7 @@ def booking_status_notification(sender, instance, **kwargs):
                         notification['message'],
                         bookingmember.user.user_id,
                         notification['booking_id'],
+                        notification['write'],
                     ),
                     eta=notification['eta']
                 )
@@ -191,7 +252,7 @@ def booking_status_notification(sender, instance, **kwargs):
                     task_id=task.id,
                     booking=instance
                 )
-                print("MENAMBAH TASK: ", task.id)
+                print(f"MENAMBAH TASK (NOTIFICATION): {task.id}")
 
         for bookingmember in bookingmembers.exclude(user=instance.user):
             Notification.objects.create(
