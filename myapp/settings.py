@@ -226,7 +226,7 @@ CELERY_TIMEZONE = os.environ.get('CELERY_TIMEZONE', 'Asia/Jakarta')
 
 # Firebase Cloud Messaging
 # Path ke file service account JSON yang didownload dari Firebase Console
-cred = credentials.Certificate(BASE_DIR / "uch-dev-882ab-firebase-adminsdk-872vv-2579255fa4.json")
+cred = credentials.Certificate(BASE_DIR / "uty-creative-hub-firebase-adminsdk-tul9l-c786a21a1e.json")
 firebase_admin.initialize_app(cred)
 
 # MQTT Configurations
