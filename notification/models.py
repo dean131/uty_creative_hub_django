@@ -202,35 +202,35 @@ def booking_status_notification(sender, instance, **kwargs):
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} akan dimulai sebentar lagi',
                 'booking_id': None,
                 'eta': aware_start_date_time - datetime.timedelta(minutes=10),
-                'write': True
+                'write': False
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah dimulai',
                 'booking_id': None,
                 'eta': aware_start_date_time,
-                'write': True
+                'write': False
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} akan berakhir dalam 10 menit',
                 'booking_id': None,
                 'eta': aware_end_date_time - datetime.timedelta(minutes=10),
-                'write': True
+                'write': False
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} akan berakhir dalam 5 menit',
                 'booking_id': None,
                 'eta': aware_end_date_time - datetime.timedelta(minutes=5),
-                'write': True
+                'write': False
             },
             {
                 'title': 'Pengingat Booking',
                 'message': f'Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah berakhir',
                 'booking_id': instance.booking_id,
                 'eta': aware_end_date_time,
-                'write': True
+                'write': False
             }
         ]
         
