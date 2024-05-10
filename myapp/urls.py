@@ -22,12 +22,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 def test(request):
-    print("#"*60)
-    print(f"SECRET_KEY      {type(settings.SECRET_KEY)}: {settings.SECRET_KEY}")
-    print(f"DEBUG           {type(settings.DEBUG)}: {settings.DEBUG}")
-    print(f"ALLOWED_HOSTS   {type(settings.ALLOWED_HOSTS)}: {settings.ALLOWED_HOSTS}")
-    print(f"CSRF_TRUSTED    {type(settings.CSRF_TRUSTED_ORIGINS)}: {settings.CSRF_TRUSTED_ORIGINS}")
-    print("#"*60)
+    # print("#"*60)
+    # print(f"SECRET_KEY      {type(settings.SECRET_KEY)}: {settings.SECRET_KEY}")
+    # print(f"DEBUG           {type(settings.DEBUG)}: {settings.DEBUG}")
+    # print(f"ALLOWED_HOSTS   {type(settings.ALLOWED_HOSTS)}: {settings.ALLOWED_HOSTS}")
+    # print(f"CSRF_TRUSTED    {type(settings.CSRF_TRUSTED_ORIGINS)}: {settings.CSRF_TRUSTED_ORIGINS}")
+    # print("#"*60)
     return HttpResponse("<h1>WASSUPPPP CUYYYY!</h1>")
 
 urlpatterns = [

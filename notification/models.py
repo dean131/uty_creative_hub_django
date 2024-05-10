@@ -252,7 +252,7 @@ def booking_status_notification(sender, instance, **kwargs):
                     task_id=task.id,
                     booking=instance
                 )
-                print(f"MENAMBAH TASK (NOTIFICATION): {task.id}")
+                print(f"MENAMBAH TASK (NOTIFICATION) untuk booking id {instance.booking_id}: {task.id}")
 
         for bookingmember in bookingmembers.exclude(user=instance.user):
             Notification.objects.create(
