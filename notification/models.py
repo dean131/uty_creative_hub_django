@@ -145,6 +145,11 @@ def booking_status_notification(sender, instance, **kwargs):
     if booking.booking_status == instance.booking_status:
         return False
     
+    # delete all related celery tasks if booking status is changed
+    celerytasks = CeleryTask.objects.filter(booking=instance)
+    if celerytasks.exists():
+        celerytasks.delete()
+    
     ## Create notification
     title = ""
     message = ""
@@ -272,20 +277,9 @@ def booking_status_notification(sender, instance, **kwargs):
         title = "Booking Selesai"
         message = f"Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah selesai."
 
-        celerytasks = CeleryTask.objects.filter(booking=instance)
-        celerytasks.delete()
-
     elif instance.booking_status == "canceled":
         title = "Booking Dibatalkan"
         message = f"Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah dibatalkan."
-
-        celerytasks = CeleryTask.objects.filter(booking=instance)
-        if celerytasks.exists():
-            for celerytask in celerytasks:
-                task = AsyncResult(celerytask.task_id)
-                task.revoke()
-        celerytasks.delete()
-                
         
     Notification.objects.create(
         notification_type='Booking',
@@ -294,6 +288,13 @@ def booking_status_notification(sender, instance, **kwargs):
         notification_topic=instance.user.user_id,
         user=instance.user
     )
+
+
+# if celery task deleted, then revoke the task
+@receiver(pre_delete, sender=CeleryTask)
+def delete_celery_task(sender, instance, **kwargs):
+    task = AsyncResult(instance.task_id)
+    task.revoke()
 
 
 # if booking deleted, then delete all related celery tasks
