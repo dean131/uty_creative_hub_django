@@ -2,7 +2,7 @@ import datetime
 
 from django.utils import timezone
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.conf import settings
 
@@ -294,7 +294,17 @@ def booking_status_notification(sender, instance, **kwargs):
         notification_topic=instance.user.user_id,
         user=instance.user
     )
-    
+
+
+# if booking deleted, then delete all related celery tasks
+@receiver(pre_delete, sender=Booking)
+def delete_celery_tasks_for_booking_reminder(sender, instance, **kwargs):
+    celerytasks = CeleryTask.objects.filter(booking=instance)
+    if celerytasks.exists():
+        for celerytask in celerytasks:
+            task = AsyncResult(celerytask.task_id)
+            task.revoke()
+        celerytasks.delete()
     
 
 @receiver(post_save, sender=Article)
