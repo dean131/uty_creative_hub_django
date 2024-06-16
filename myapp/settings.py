@@ -9,15 +9,15 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+from firebase_admin import credentials
+import firebase_admin
+from datetime import timedelta
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-from datetime import timedelta
-import firebase_admin
-from firebase_admin import credentials
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -33,7 +33,8 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(' ')
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # SECURE_SSL_REDIRECT = True
 
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:1337').split(' ')
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', 'http://localhost:1337').split(' ')
 
 AUTH_USER_MODEL = "account.User"
 
@@ -212,7 +213,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # SMTP Configurations
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
@@ -220,18 +222,19 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True) == 'True'
 
 # Celery Configurations
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://127.0.0.1:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://127.0.0.1:6379/0')
+CELERY_BROKER_URL = os.environ.get(
+    'CELERY_BROKER_URL', 'redis://127.0.0.1:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get(
+    'CELERY_RESULT_BACKEND', 'redis://127.0.0.1:6379/0')
 CELERY_TIMEZONE = os.environ.get('CELERY_TIMEZONE', 'Asia/Jakarta')
 
 # Firebase Cloud Messaging
 # Path ke file service account JSON yang didownload dari Firebase Console
-cred = credentials.Certificate(BASE_DIR / "uty-creative-hub-firebase-adminsdk-tul9l-c786a21a1e.json")
+cred = credentials.Certificate(
+    BASE_DIR / "uty-creative-hub-45348-firebase-adminsdk-7fh42-34a16a5e10.json")
 firebase_admin.initialize_app(cred)
 
 # MQTT Configurations
 MQTT_SERVER = os.environ.get('MQTT_SERVER', 'localhost')
 MQTT_PORT = int(os.environ.get('MQTT_PORT', 1883))
 MQTT_TOPIC = os.environ.get('MQTT_TOPIC', 'uch/pintu')
-
-
