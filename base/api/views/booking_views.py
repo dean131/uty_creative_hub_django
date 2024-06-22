@@ -161,10 +161,17 @@ class BookingModelViewSet(ModelViewSet):
                 message='Booking status diperlukan',
             )
 
-        queryset = self.get_queryset().filter(
-            booking_status=booking_status, 
-            user=user,
-        )
+        if booking_status in  ["rejected", "canceled"]:
+            queryset = self.get_queryset().filter(
+                Q(booking_status="rejected") | Q(booking_status="canceled"),
+                user=user,
+            )
+        else:
+            queryset = self.get_queryset().filter(
+                booking_status=booking_status, 
+                user=user,
+            )
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -206,6 +213,18 @@ class BookingModelViewSet(ModelViewSet):
         booking.user.save()
         return CustomResponse.ok(
             message='Booking status berhasil diubah',
+        )
+    
+    @action(methods=['POST'], detail=True)
+    def cancel_booking(self, request, *args, **kwargs):
+        booking = self.get_object()
+        cancellation_reason = request.data.get('cancellation_reason')
+        
+        booking.booking_status = 'canceled'
+        booking.cancellation_reason = cancellation_reason
+        booking.save()
+        return CustomResponse.ok(
+            message='Booking berhasil dibatalkan',
         )
 
     @action(methods=['POST'], detail=False)

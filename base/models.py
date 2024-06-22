@@ -103,6 +103,7 @@ class Booking(models.Model):
     booking_date = models.DateField()
     booking_status = models.CharField(max_length=30, default="pending", choices=BOOKING_STATUS)
     booking_needs = models.TextField(null=True, blank=True)
+    cancellation_reason = models.TextField(null=True, blank=True)
     is_rated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
