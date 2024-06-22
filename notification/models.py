@@ -270,7 +270,7 @@ def booking_status_notification(sender, instance, **kwargs):
             
 
     elif instance.booking_status == "rejected":
-        title = "Booking ditolak"
+        title = "Booking Ditolak"
         message = f"Hai {instance.user.first_name}, booking anda dengan ID Reservasi #{instance.booking_id} telah ditolak."
 
     elif instance.booking_status == "completed":
