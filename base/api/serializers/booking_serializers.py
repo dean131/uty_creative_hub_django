@@ -57,6 +57,7 @@ class BookingDetailModelSerializer(serializers.ModelSerializer):
             'booking_date',
             'booking_status',
             'booking_needs',
+            'cancellation_reason',
             'created_at',
             'bookingtime',
             'is_rated',

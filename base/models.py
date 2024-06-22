@@ -89,6 +89,7 @@ class BookingTime(models.Model):
 class Booking(models.Model):
     class Meta:
         ordering = ["-created_at"]
+        
     BOOKING_STATUS = (
         ("initiated", "Initiated"),
         ("pending", "Pending"),
