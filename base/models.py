@@ -1,11 +1,13 @@
 import uuid
 from django.utils import timezone
+from django.utils.formats import date_format
+from django.utils.translation import gettext as _
+from django.utils.timesince import timesince
 
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from django.utils.timesince import timesince
 
 
 class Faculty(models.Model):
@@ -180,32 +182,17 @@ class Article(models.Model):
     
     @property
     def formated_created_at(self):
-        indo_days = {
-            'Monday': 'Senin',
-            'Tuesday': 'Selasa',
-            'Wednesday': 'Rabu',
-            'Thursday': 'Kamis',
-            'Friday': 'Jumat',
-            'Saturday': 'Sabtu',
-            'Sunday': 'Minggu'
+        localized_date = timezone.localtime(self.created_at)
+        
+        components = {
+            'hari': date_format(localized_date, 'l'),
+            'tanggal': date_format(localized_date, 'd'),
+            'bulan': _(date_format(localized_date, 'F')),
+            'tahun': date_format(localized_date, 'Y'),
+            'waktu': date_format(localized_date, 'H:i')
         }
-        indo_month = {
-            'January': 'Januari',
-            'February': 'Februari',
-            'March': 'Maret',
-            'April': 'April',
-            'May': 'Mei',
-            'June': 'Juni',
-            'July': 'Juli',
-            'August': 'Agustus',
-            'September': 'September',
-            'October': 'Oktober',
-            'November': 'November',
-            'December': 'Desember'
-        }
-        indo_day = indo_days[self.created_at.strftime('%A')]
-        indo_month = indo_month[self.created_at.strftime('%B')]
-        return self.created_at.strftime(f'{indo_day}, %d {indo_month} %Y %H:%M WIB')
+        
+        return "{hari}, {tanggal} {bulan} {tahun} {waktu} WIB".format(**components)
 
 
 class ArticleImage(models.Model):
