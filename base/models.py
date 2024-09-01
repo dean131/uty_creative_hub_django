@@ -166,6 +166,9 @@ class Rating(models.Model):
 
 
 class Article(models.Model):
+    class Meta:
+        ordering = ["-created_at"]
+        
     article_id = models.AutoField(primary_key=True, unique=True, editable=False)
     article_type = models.CharField(max_length=30)
     article_title = models.CharField(max_length=100)
