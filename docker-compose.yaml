@@ -20,6 +20,8 @@ services:
     depends_on:
       - uch_db
       - uch_redis
+    networks:
+      - nginx-proxy-manager_default
 
   uch_db:
     container_name: uch_db
@@ -28,6 +30,8 @@ services:
       - db_volume:/var/lib/postgresql/data/
     env_file:
       - .env.dev
+    networks:
+      - nginx-proxy-manager_default
 
   uch_redis:
     container_name: uch_redis
@@ -35,6 +39,8 @@ services:
     command: redis-server --dir /data 
     volumes:
       - celery_data_volume:/data
+    networks:
+      - nginx-proxy-manager_default
 
   uch_celery_worker:
     container_name: uch_celery_worker
@@ -50,6 +56,8 @@ services:
     depends_on:
       - uch_db
       - uch_redis
+    networks:
+      - nginx-proxy-manager_default
 
   # uch_nginx:
   #   container_name: uch_nginx
