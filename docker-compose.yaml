@@ -51,20 +51,20 @@ services:
       - uch_db
       - uch_redis
 
-  uch_nginx:
-    container_name: uch_nginx
-    build: 
-      context: ./nginx
-      dockerfile: Dockerfile
-    image: uch_nginx
-    ports:
-      - 1337:80
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-      - static_volume:/app/staticfiles
-      - media_volume:/app/mediafiles
-    depends_on:
-      - uch_backend
+  # uch_nginx:
+  #   container_name: uch_nginx
+  #   build: 
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   image: uch_nginx
+  #   ports:
+  #     - 1337:80
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+  #     - static_volume:/app/staticfiles
+  #     - media_volume:/app/mediafiles
+  #   depends_on:
+  #     - uch_backend
 
 volumes:
   static_volume:
@@ -75,3 +75,7 @@ volumes:
     name: db_volume
   celery_data_volume:
     name: celery_data_volume
+
+networks:
+  nginx-proxy-manager_default:
+    external: true
