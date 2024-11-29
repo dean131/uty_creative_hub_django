@@ -1,16 +1,11 @@
-version: '3.8'
-
 services:
   uch_backend:
     container_name: uch_backend
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     image: uch_backend
-    command: sh -c "python3 manage.py makemigrations account base notification && 
-                    python3 manage.py migrate --no-input && 
-                    python3 manage.py collectstatic --no-input && 
-                    gunicorn --config gunicorn_config.py myapp.wsgi:application"
+    command: sh -c "python3 manage.py makemigrations account base notification && python3 manage.py migrate --no-input && python3 manage.py collectstatic --no-input && gunicorn --config gunicorn_config.py myapp.wsgi:application"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -21,7 +16,7 @@ services:
       - uch_db
       - uch_redis
     networks:
-      - nginx-proxy-manager_default
+      - npm_networks
 
   uch_db:
     container_name: uch_db
@@ -31,16 +26,16 @@ services:
     env_file:
       - .env.dev
     networks:
-      - nginx-proxy-manager_default
+      - npm_networks
 
   uch_redis:
     container_name: uch_redis
-    image: redis:7-alpine 
-    command: redis-server --dir /data 
+    image: redis:7-alpine
+    command: redis-server --dir /data
     volumes:
       - celery_data_volume:/data
     networks:
-      - nginx-proxy-manager_default
+      - npm_networks
 
   uch_celery_worker:
     container_name: uch_celery_worker
@@ -57,8 +52,7 @@ services:
       - uch_db
       - uch_redis
     networks:
-      - nginx-proxy-manager_default
-
+      - npm_networks
   # uch_nginx:
   #   container_name: uch_nginx
   #   build: 
@@ -85,5 +79,5 @@ volumes:
     name: celery_data_volume
 
 networks:
-  nginx-proxy-manager_default:
+  npm_networks:
     external: true
