@@ -16,8 +16,9 @@ ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-RUN mkdir staticfiles
-RUN mkdir mediafiles
+RUN mkdir static
+RUN mkdir ./static/staticfiles
+RUN mkdir ./static/mediafiles
 
 # copy project
 COPY . .

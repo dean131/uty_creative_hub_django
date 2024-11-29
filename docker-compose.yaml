@@ -8,8 +8,6 @@ services:
     command: sh -c "python3 manage.py makemigrations account base notification && python3 manage.py migrate --no-input && python3 manage.py collectstatic --no-input && gunicorn --config gunicorn_config.py myapp.wsgi:application"
     volumes:
       - .:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/mediafiles
     env_file:
       - .env.dev
     depends_on:
@@ -53,26 +51,8 @@ services:
       - uch_redis
     networks:
       - npm_networks
-  # uch_nginx:
-  #   container_name: uch_nginx
-  #   build: 
-  #     context: ./nginx
-  #     dockerfile: Dockerfile
-  #   image: uch_nginx
-  #   ports:
-  #     - 1337:80
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-  #     - static_volume:/app/staticfiles
-  #     - media_volume:/app/mediafiles
-  #   depends_on:
-  #     - uch_backend
 
 volumes:
-  static_volume:
-    name: static_volume
-  media_volume:
-    name: media_volume
   db_volume:
     name: db_volume
   celery_data_volume:
